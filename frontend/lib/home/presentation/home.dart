@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:shieldbot/bruteforce/presentation/bruteforce.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -89,13 +90,109 @@ class _HomeState extends State<Home> {
                   ],
                 ),
               ),
-              Container(
-                child: Row(
-                  children: [
-                    SvgPicture.asset(
-                      'assets/images/widgets_dark.svg',
-                    ),
-                  ],
+              Center(
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 100),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Container(
+                        width: 500,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Industry Specific & Powerful Reports',
+                              style: TextStyle(
+                                  fontSize: 25,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w700),
+                            ),
+                            SizedBox(
+                              height: 10,
+                            ),
+                            Text(
+                              'Different industries require different needs. Our team has experience working in Healthcare, Financial Services, Legal, and with Software Companies.',
+                              style: TextStyle(
+                                  fontSize: 20,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w400),
+                            ),
+                            SizedBox(
+                              height: 10,
+                            ),
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.import_contacts,
+                                  color: Colors.red,
+                                ),
+                                SizedBox(
+                                  width: 10,
+                                ),
+                                Text(
+                                  'Maintain',
+                                  style: TextStyle(
+                                      fontSize: 20,
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w400),
+                                )
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.import_contacts,
+                                  color: Colors.red,
+                                ),
+                                SizedBox(
+                                  width: 10,
+                                ),
+                                Text(
+                                  'Maintain',
+                                  style: TextStyle(
+                                      fontSize: 20,
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w400),
+                                )
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.import_contacts,
+                                  color: Colors.red,
+                                ),
+                                SizedBox(
+                                  width: 10,
+                                ),
+                                Text(
+                                  'Maintain',
+                                  style: TextStyle(
+                                      fontSize: 20,
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w400),
+                                )
+                              ],
+                            ),
+                            SizedBox(
+                              height: 10,
+                            ),
+                            ElevatedButton(
+                                onPressed: () => Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => BruteforceScreen(),
+                                    )),
+                                child: Text('Start Scan'))
+                          ],
+                        ),
+                      ),
+                      SvgPicture.asset(
+                        'assets/images/widgets_dark.svg',
+                      ),
+                    ],
+                  ),
                 ),
               ),
               Container(
@@ -123,7 +220,7 @@ class _HomeState extends State<Home> {
                           height: 10,
                         ),
                         Container(
-                          width: 300,
+                          width: 500,
                           child: const Text(
                             'We are a cybersecurity technology platform that has sourced the tools, methods, and techniques attackers use. Our system allows owners and operators to find potential risks and exposures before attackers do.',
                             textAlign: TextAlign.start,
