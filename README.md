@@ -1,10 +1,3 @@
-Here’s an enhanced and professionalized version of your **ShieldBot Documentation**. I will also outline steps for generating a document file.
-
----
-
-### **Enhanced Documentation**
-
-```markdown
 # **ShieldBot**
 
 **ShieldBot** is a Flask-based application designed to simulate security tests, including brute force attacks, SQL injection, and DoS attack simulations. This tool is intended for ethical testing and educational purposes to evaluate the vulnerabilities of web applications.
