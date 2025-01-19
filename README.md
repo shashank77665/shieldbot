@@ -1,72 +1,104 @@
-# **ShieldBot**
+# ShieldBot
 
-**ShieldBot** is a Flask-based application designed to simulate security tests, including brute force attacks, SQL injection, and DoS attack simulations. This tool is intended for ethical testing and educational purposes to evaluate the vulnerabilities of web applications.
+## Overview
 
----
-
-## **Table of Contents**
-
-1. [About the Project](#about-the-project)
-2. [Disclaimer](#disclaimer)
-3. [Features](#features)
-4. [Prerequisites](#prerequisites)
-5. [Installation](#installation)
-6. [Usage](#usage)
-7. [Testing the Application](#testing-the-application)
-8. [Deployment](#deployment)
-9. [Troubleshooting](#troubleshooting)
-10. [Contributing](#contributing)
-11. [License](#license)
+ShieldBot is a comprehensive application designed for testing web vulnerabilities, including brute force attacks, SQL injection, and DoS simulations. The project consists of a **Flutter-based front-end** and a **Flask-based backend**, integrated with Firebase and other technologies for real-time updates and robust functionality.
 
 ---
 
-## **About the Project**
+## **Frontend**
 
-ShieldBot is designed to:
-- Simulate real-world attacks such as brute force, SQL injection, and DoS.
-- Assist in understanding web application vulnerabilities.
-- Provide an asynchronous and scalable architecture using Flask, Redis, and Celery.
+### Overview
 
----
+The frontend of ShieldBot is built with Flutter and provides a user-friendly interface for simulating security tests. It connects with the backend for executing tasks and displaying real-time results.
 
-## **Disclaimer**
+### Features
 
-> ⚠️ **For Educational Purposes Only**: This project is strictly for ethical testing. Unauthorized testing of websites without proper authorization is illegal. Ensure that you have explicit permission before using this tool.
+- **Brute Force Attack Simulation**: Test for common password vulnerabilities.
+- **SQL Injection Simulation**: Identify weak query sanitization practices.
+- **Denial of Service Simulation**: Evaluate server resilience under high traffic.
+- **Firebase Integration**: Real-time updates and data synchronization.
+- **Interactive UI**: Built with Flutter for a responsive and engaging experience.
 
----
+### Getting Started
 
-## **Features**
-- **Brute Force Attack Simulation**: Test common password vulnerabilities.
-- **SQL Injection Simulation**: Identify weak query sanitization.
-- **Denial of Service Simulation**: Test server resilience under high traffic.
-- **Asynchronous Processing**: Use Celery and Redis to handle large-scale tasks efficiently.
-- **Database Logging**: Record detailed logs and results of all tests.
+#### Prerequisites
 
----
+- Install Flutter SDK.
+- Use an IDE like Android Studio or Visual Studio Code for Flutter development.
 
-## **Prerequisites**
+#### Steps to Run the Frontend
 
-### **System Requirements**
-- Operating System: Windows, macOS, or Linux
-- Python: Version 3.10 or later
-- PostgreSQL: Version 14 or later
-- Redis: Latest version
-- Docker: Optional, for containerized deployment
+### Clone the Repository
 
-### **Installed Tools**
-- Python package manager (`pip`)
-- PostgreSQL database server
-- Redis server
+To clone the repository, run the following command:
 
----
 
-## **Installation**
 
-### **1. Clone the Repository**
 ```bash
-git clone <repository_url>
+git clone https://github.com/shashank77665/shieldbot.git
+```
+- Navigate to Project directory
+
+```bash
 cd shieldbot
 ```
+
+
+```bash
+cd frontend
+```
+
+- Clean the Project
+```bash
+flutter clean
+```
+- Get dependencies
+
+```bash
+flutter pub get
+```
+
+- Run Project
+
+```bash
+Flutter run
+```
+
+# Backend
+
+## Overview
+
+The backend of **ShieldBot** is a Flask application designed for simulating security tests. It uses asynchronous processing with **Celery** and **Redis** for scalability and stores results in a **PostgreSQL** database.
+
+---
+
+## Features
+
+- Brute Force, SQL Injection, and DoS Simulations.
+- Asynchronous Processing with **Celery** and **Redis**.
+- Database Logging for test results and logs.
+- APIs for Frontend Integration.
+
+---
+
+## Prerequisites
+
+- **Python 3.10** or later  
+- **PostgreSQL 14** or later  
+- **Redis**  
+- **Docker** (optional, for containerized deployment)
+
+---
+
+## Installation
+
+### **1. Clone the Repository:
+
+```bash
+git clone https://github.com/shashank77665/shieldbot.git
+cd shieldbot
+
 
 ### **2. Set Up Python Environment**
 1. Create a virtual environment:
