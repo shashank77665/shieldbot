@@ -1,0 +1,19 @@
+from datetime import datetime
+
+def parse_response(response):
+    """Parse the HTTP response and extract relevant details."""
+    return {
+        "status_code": response.status_code,
+        "headers": dict(response.headers),
+        "content_snippet": response.text[:200],  # Extract first 200 characters
+    }
+
+def format_log(message, details=None):
+    """Format log entries with a timestamp."""
+    log_entry = {
+        "timestamp": str(datetime.now()),
+        "message": message,
+    }
+    if details:
+        log_entry["details"] = details
+    return log_entry

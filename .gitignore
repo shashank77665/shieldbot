@@ -1,0 +1,56 @@
+# Python Bytecode
+__pycache__/
+*.py[cod]
+
+# Virtual Environment
+venv/
+env/
+
+# Logs
+*.log
+logs/
+
+# Temporary Files
+*.tmp
+*.bak
+*.swp
+*.swo
+*.~lock.*
+
+# Operating System Files
+.DS_Store
+Thumbs.db
+
+# Flask Instance and Config Files
+instance/
+config.py
+
+# Database Files
+*.sqlite3
+*.db
+
+# Environment Variables
+.env
+.env.*
+
+# Test and Coverage
+htmlcov/
+.coverage
+.cache
+
+# Build Artifacts
+dist/
+build/
+*.egg-info/
+*.egg
+
+# Docker
+*.env.docker
+docker-compose.override.yml
+
+# IDE Files
+.vscode/
+.idea/
+
+# Redis Dump File
+dump.rdb
