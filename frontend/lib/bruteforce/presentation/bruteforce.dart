@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'dart:convert'; // For JSON encoding
+import 'package:http/http.dart' as http;
+import 'package:shieldbot/bruteforce/presentation/attackstatus.dart';
 
 class BruteforceScreen extends StatefulWidget {
   const BruteforceScreen({super.key});
@@ -11,6 +14,73 @@ class _BruteforceScreenState extends State<BruteforceScreen> {
   bool performbruteforce = false;
   bool performsqlinjection = false;
   bool performdos = false;
+  final TextEditingController baseUrlController = TextEditingController();
+  final TextEditingController dosrequestcountController =
+      TextEditingController();
+  var base_url;
+  var sqlinjection_payload = [];
+  var dos_request_count = 0;
+
+  Future<void> Startattack() async {
+    final url = Uri.parse('http://127.0.0.1:5000/test-website');
+    final body = {
+      "base_url": base_url,
+      "options": {
+        "brute_force": {
+          "passwords": ["admin", "password123"]
+        },
+        "sql_injection": {"payloads": sqlinjection_payload},
+        "dos": {"request_count": dos_request_count}
+      }
+    };
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(body),
+      );
+
+      if (response.statusCode == 202) {
+        final jsonResponse = jsonDecode(response.body);
+        final message = jsonResponse['message'];
+        final taskId = jsonResponse['task_id'];
+        print('Response: ${response.body}');
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('Response'),
+              content: Text('Message: $message\nTask ID: $taskId'),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text('Perform New Attack'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => AttackStatusScreen(
+                            taskId: taskId,
+                          ),
+                        ));
+                  },
+                  child: Text('Check Attack Status'),
+                ),
+              ],
+            );
+          },
+        );
+      } else {
+        print('Error: ${response.statusCode}, ${response.body}');
+      }
+    } catch (e) {
+      print('Failed to send POST request: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,6 +113,7 @@ class _BruteforceScreenState extends State<BruteforceScreen> {
                   Container(
                     width: MediaQuery.of(context).size.width * 0.3,
                     child: TextField(
+                      controller: baseUrlController,
                       decoration: InputDecoration(
                         labelText: 'base_url',
                         border: OutlineInputBorder(
@@ -98,7 +169,138 @@ class _BruteforceScreenState extends State<BruteforceScreen> {
                     ),
                   ),
                   ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () async {
+                        base_url = baseUrlController.text;
+                        if (base_url == null || base_url.isEmpty) {
+                          print('Error: Base URL is not set.');
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: Text('Missing Base URL'),
+                                content: Text(
+                                    'Please enter the Base URL before starting the attack.'),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                    child: Text('OK'),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        } else if (performbruteforce ||
+                            performsqlinjection ||
+                            performdos) {
+                          if (performsqlinjection) {
+                            sqlinjection_payload = [
+                              "' OR '1'='1",
+                              "' UNION SELECT NULL--"
+                            ];
+                            if (performdos) {
+                              await showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    title: Text('Set Request Amount'),
+                                    content: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        TextField(
+                                          controller: dosrequestcountController,
+                                          keyboardType: TextInputType.number,
+                                          decoration: InputDecoration(
+                                            labelText: 'Request Amount',
+                                            border: OutlineInputBorder(),
+                                          ),
+                                        ),
+                                        SizedBox(height: 10),
+                                        Wrap(
+                                          spacing: 10,
+                                          children: [
+                                            for (int value in [
+                                              100,
+                                              200,
+                                              500,
+                                              -100,
+                                              -200,
+                                              -500
+                                            ])
+                                              ElevatedButton(
+                                                onPressed: () {
+                                                  int currentAmount = int.tryParse(
+                                                          dosrequestcountController
+                                                              .text) ??
+                                                      0;
+                                                  currentAmount += value;
+                                                  dosrequestcountController
+                                                          .text =
+                                                      currentAmount.toString();
+                                                },
+                                                child: Text(
+                                                  (value > 0 ? '+' : '') +
+                                                      value.toString(),
+                                                  style:
+                                                      TextStyle(fontSize: 16),
+                                                ),
+                                              ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: Text('Cancel'),
+                                      ),
+                                      ElevatedButton(
+                                        onPressed: () async {
+                                          int enteredAmount = int.tryParse(
+                                                  dosrequestcountController
+                                                      .text) ??
+                                              0;
+                                          dos_request_count = enteredAmount;
+                                          Navigator.of(context).pop();
+                                          await Startattack();
+                                          baseUrlController.clear();
+                                        },
+                                        child: Text('OK'),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            }
+                          }
+                        }
+                        if (!performbruteforce &&
+                            !performsqlinjection &&
+                            !performdos) {
+                          showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: Text('Warning'),
+                              content: Text(
+                                  'Select atleast 1 Attack type to proced '),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: Text('OK'),
+                                ),
+                              ],
+                            ),
+                          );
+                        } else {
+                          await Startattack();
+                          baseUrlController.clear();
+                        }
+                      },
                       style: ButtonStyle(
                           foregroundColor: WidgetStatePropertyAll(Colors.white),
                           backgroundColor:
