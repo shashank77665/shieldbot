@@ -1,1 +1,1 @@
-final backend_url = 'shashank.onthewifi.com:5000';
+final backend_url = '223.235.70.197:5000';

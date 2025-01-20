@@ -46,6 +46,7 @@ class _BruteforceScreenState extends State<BruteforceScreen> {
         final message = jsonResponse['message'];
         final taskId = jsonResponse['task_id'];
         print('Response: ${response.body}');
+
         showDialog(
           context: context,
           builder: (BuildContext context) {
@@ -76,10 +77,17 @@ class _BruteforceScreenState extends State<BruteforceScreen> {
           },
         );
       } else {
-        print('Error: ${response.statusCode}, ${response.body}');
+        // Show error in SnackBar for unsuccessful status code
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text('Error: ${response.statusCode}, ${response.body}')),
+        );
       }
     } catch (e) {
-      print('Failed to send POST request: $e');
+      // Show error in SnackBar if there is an exception
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to send POST request: $e')),
+      );
     }
   }
 
