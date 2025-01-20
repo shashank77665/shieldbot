@@ -23,7 +23,7 @@ class _BruteforceScreenState extends State<BruteforceScreen> {
   var dos_request_count = 0;
 
   Future<void> Startattack() async {
-    final url = Uri.parse('http://$backend_url/test-website');
+    final url = Uri.parse('$backend_url/test-website');
     final body = {
       "base_url": base_url,
       "options": {
