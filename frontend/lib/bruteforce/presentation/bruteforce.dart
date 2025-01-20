@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:convert'; // For JSON encoding
 import 'package:http/http.dart' as http;
 import 'package:shieldbot/bruteforce/presentation/attackstatus.dart';
+import 'package:shieldbot/keys.dart';
 
 class BruteforceScreen extends StatefulWidget {
   const BruteforceScreen({super.key});
@@ -22,7 +23,7 @@ class _BruteforceScreenState extends State<BruteforceScreen> {
   var dos_request_count = 0;
 
   Future<void> Startattack() async {
-    final url = Uri.parse('http://127.0.0.1:5000/test-website');
+    final url = Uri.parse('http://$backend_url/test-website');
     final body = {
       "base_url": base_url,
       "options": {
@@ -171,8 +172,9 @@ class _BruteforceScreenState extends State<BruteforceScreen> {
                   ElevatedButton(
                       onPressed: () async {
                         base_url = baseUrlController.text;
+
                         if (base_url == null || base_url.isEmpty) {
-                          print('Error: Base URL is not set.');
+                          // Show missing Base URL dialog
                           showDialog(
                             context: context,
                             builder: (BuildContext context) {
@@ -191,101 +193,98 @@ class _BruteforceScreenState extends State<BruteforceScreen> {
                               );
                             },
                           );
-                        } else if (performbruteforce ||
-                            performsqlinjection ||
-                            performdos) {
-                          if (performsqlinjection) {
-                            sqlinjection_payload = [
-                              "' OR '1'='1",
-                              "' UNION SELECT NULL--"
-                            ];
-                            if (performdos) {
-                              await showDialog(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return AlertDialog(
-                                    title: Text('Set Request Amount'),
-                                    content: Column(
-                                      mainAxisSize: MainAxisSize.min,
+                          return; // Exit early
+                        }
+
+                        if (performsqlinjection) {
+                          sqlinjection_payload = [
+                            "' OR '1'='1",
+                            "' UNION SELECT NULL--"
+                          ];
+                        }
+
+                        if (performdos) {
+                          await showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: Text('Set Request Amount'),
+                                content: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    TextField(
+                                      controller: dosrequestcountController,
+                                      keyboardType: TextInputType.number,
+                                      decoration: InputDecoration(
+                                        labelText: 'Request Amount',
+                                        border: OutlineInputBorder(),
+                                      ),
+                                    ),
+                                    SizedBox(height: 10),
+                                    Wrap(
+                                      spacing: 10,
                                       children: [
-                                        TextField(
-                                          controller: dosrequestcountController,
-                                          keyboardType: TextInputType.number,
-                                          decoration: InputDecoration(
-                                            labelText: 'Request Amount',
-                                            border: OutlineInputBorder(),
+                                        for (int value in [
+                                          100,
+                                          200,
+                                          500,
+                                          -100,
+                                          -200,
+                                          -500
+                                        ])
+                                          ElevatedButton(
+                                            onPressed: () {
+                                              int currentAmount = int.tryParse(
+                                                      dosrequestcountController
+                                                          .text) ??
+                                                  0;
+                                              currentAmount += value;
+                                              dosrequestcountController.text =
+                                                  currentAmount.toString();
+                                            },
+                                            child: Text(
+                                              (value > 0 ? '+' : '') +
+                                                  value.toString(),
+                                              style: TextStyle(fontSize: 16),
+                                            ),
                                           ),
-                                        ),
-                                        SizedBox(height: 10),
-                                        Wrap(
-                                          spacing: 10,
-                                          children: [
-                                            for (int value in [
-                                              100,
-                                              200,
-                                              500,
-                                              -100,
-                                              -200,
-                                              -500
-                                            ])
-                                              ElevatedButton(
-                                                onPressed: () {
-                                                  int currentAmount = int.tryParse(
-                                                          dosrequestcountController
-                                                              .text) ??
-                                                      0;
-                                                  currentAmount += value;
-                                                  dosrequestcountController
-                                                          .text =
-                                                      currentAmount.toString();
-                                                },
-                                                child: Text(
-                                                  (value > 0 ? '+' : '') +
-                                                      value.toString(),
-                                                  style:
-                                                      TextStyle(fontSize: 16),
-                                                ),
-                                              ),
-                                          ],
-                                        ),
                                       ],
                                     ),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () {
-                                          Navigator.of(context).pop();
-                                        },
-                                        child: Text('Cancel'),
-                                      ),
-                                      ElevatedButton(
-                                        onPressed: () async {
-                                          int enteredAmount = int.tryParse(
-                                                  dosrequestcountController
-                                                      .text) ??
-                                              0;
-                                          dos_request_count = enteredAmount;
-                                          Navigator.of(context).pop();
-                                          await Startattack();
-                                          baseUrlController.clear();
-                                        },
-                                        child: Text('OK'),
-                                      ),
-                                    ],
-                                  );
-                                },
+                                  ],
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                    child: Text('Cancel'),
+                                  ),
+                                  ElevatedButton(
+                                    onPressed: () {
+                                      int enteredAmount = int.tryParse(
+                                              dosrequestcountController.text) ??
+                                          0;
+                                      dos_request_count = enteredAmount;
+                                      Navigator.of(context).pop();
+                                    },
+                                    child: Text('OK'),
+                                  ),
+                                ],
                               );
-                            }
-                          }
+                            },
+                          );
                         }
+
                         if (!performbruteforce &&
                             !performsqlinjection &&
                             !performdos) {
+                          // Show warning dialog if no attack type is selected
                           showDialog(
                             context: context,
                             builder: (context) => AlertDialog(
                               title: Text('Warning'),
                               content: Text(
-                                  'Select atleast 1 Attack type to proced '),
+                                  'Select at least 1 Attack type to proceed.'),
                               actions: [
                                 TextButton(
                                   onPressed: () {
@@ -296,10 +295,13 @@ class _BruteforceScreenState extends State<BruteforceScreen> {
                               ],
                             ),
                           );
-                        } else {
-                          await Startattack();
-                          baseUrlController.clear();
+                          return; // Exit early
                         }
+
+                        // If all validations are satisfied, start the attack
+                        await Startattack();
+                        baseUrlController.clear();
+                        dosrequestcountController.clear();
                       },
                       style: ButtonStyle(
                           foregroundColor: WidgetStatePropertyAll(Colors.white),
