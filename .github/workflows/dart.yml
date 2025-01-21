@@ -33,8 +33,21 @@ jobs:
           cd frontend
           flutter build web --release
 
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.TOKEN }}
-          publish_dir: frontend/build/web
+      - name: Clone shieldbot-web Repository
+        run: |
+          git clone https://github.com/shashank77665/shieldbot-web.git shieldbot-web
+          rm -rf shieldbot-web/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}
+
+      - name: Copy Build to shieldbot-web
+        run: |
+          cp -r frontend/build/web/* shieldbot-web/
+          cd shieldbot-web
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add .
+          git commit -m "Deploy Flutter Web build"
+          git push origin main
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}
