@@ -94,10 +94,10 @@ class _HomeState extends State<Home> {
                 child: Container(
                   padding: EdgeInsets.symmetric(horizontal: 100),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Container(
-                        width: 500,
+                        width: 400,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -190,6 +190,7 @@ class _HomeState extends State<Home> {
                       ),
                       SvgPicture.asset(
                         'assets/images/widgets_dark.svg',
+                        width: 700,
                       ),
                     ],
                   ),
