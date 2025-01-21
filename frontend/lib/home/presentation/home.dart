@@ -167,7 +167,7 @@ class _HomeState extends State<Home> {
                                   width: 10,
                                 ),
                                 Text(
-                                  'Maintain',
+                                  'DOS',
                                   style: TextStyle(
                                       fontSize: 20,
                                       color: Colors.white,
