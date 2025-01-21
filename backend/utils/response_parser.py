@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import timezone
 
 def parse_response(response):
     """Parse the HTTP response and extract relevant details."""
@@ -11,7 +11,7 @@ def parse_response(response):
 def format_log(message, details=None):
     """Format log entries with a timestamp."""
     log_entry = {
-        "timestamp": str(datetime.now()),
+        "timestamp": str(datetime.now(timezone.utc)),
         "message": message,
     }
     if details:

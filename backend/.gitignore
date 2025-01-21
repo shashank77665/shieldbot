@@ -3,8 +3,17 @@ __pycache__/
 *.py[cod]
 
 # Virtual Environment
+# Ignore common virtual environment folders and associated directories
 venv/
 env/
+Lib/
+Scripts/
+Include/
+pyvenv.cfg
+
+# Environment Variables
+.env
+.env.*
 
 # Logs
 *.log
@@ -28,10 +37,6 @@ config.py
 # Database Files
 *.sqlite3
 *.db
-
-# Environment Variables
-.env
-.env.*
 
 # Test and Coverage
 htmlcov/
