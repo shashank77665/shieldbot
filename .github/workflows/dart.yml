@@ -35,10 +35,8 @@ jobs:
 
       - name: Clone shieldbot-web Repository
         run: |
-          git clone https://github.com/shashank77665/shieldbot-web.git shieldbot-web
+          git clone https://x-access-token:${{ secrets.TOKEN }}@github.com/shashank77665/shieldbot-web.git shieldbot-web
           rm -rf shieldbot-web/*
-        env:
-          GITHUB_TOKEN: ${{ secrets.TOKEN }}
 
       - name: Copy Build to shieldbot-web
         run: |
@@ -49,5 +47,4 @@ jobs:
           git add .
           git commit -m "Deploy Flutter Web build"
           git push origin main
-        env:
-          GITHUB_TOKEN: ${{ secrets.TOKEN }}
+
