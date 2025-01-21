@@ -131,7 +131,7 @@ class _HomeState extends State<Home> {
                                   width: 10,
                                 ),
                                 Text(
-                                  'Maintain',
+                                  'Brute Force',
                                   style: TextStyle(
                                       fontSize: 20,
                                       color: Colors.white,
