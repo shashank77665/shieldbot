@@ -23,13 +23,9 @@ jobs:
       - name: Verify Flutter Installation
         run: flutter doctor -v
 
-      - name: Fetch Backend URL from GitHub Secrets
+      - name: Create .env File with Backend URL
         run: |
-          echo "BACKEND_URL=${{ secrets.BACKEND_URL }}" >> $GITHUB_ENV
-
-      - name: Update .env File with Backend URL
-        run: |
-          echo "BACKEND_URL=${{ secrets.BACKEND_URL }}" > .env
+          echo "BACKEND_URL=${{ secrets.BACKEND_URL }}" > frontend/.env
 
       - name: Install Dependencies
         run: |
@@ -55,7 +51,3 @@ jobs:
           git add .
           git commit -m "Deploy Flutter Web build"
           git push origin main
-
-      - name: Use Backend URL in Deployment (optional)
-        run: |
-          echo "Using the backend URL: ${{ secrets.BACKEND_URL }}"
