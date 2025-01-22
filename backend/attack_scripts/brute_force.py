@@ -47,11 +47,19 @@ def brute_force_test(base_url, options):
                     "response": response.text
                 }
                 break
+
         except requests.RequestException as e:
+            # Handle typical HTTP errors (network, timeout, 4xx/5xx) 
             results["details"] = {"error": str(e)}
             break
 
-    if not results["success"]:
+        except Exception as e:
+            # Catch any other unexpected exception
+            results["details"] = {"error": str(e)}
+            break
+
+    if not results["success"] and results["details"] is None:
+        # If we never found valid credentials and didn't encounter an exception
         results["details"] = "Brute force attack failed. No matching credentials found."
 
     return results

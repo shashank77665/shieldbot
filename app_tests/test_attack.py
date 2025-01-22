@@ -5,6 +5,12 @@ from utils.hash_utils import hash_password
 from datetime import datetime, timedelta, timezone
 import jwt
 import os
+def generate_valid_token(user_id=1):
+    payload = {
+        "user_id": user_id,
+        "exp": datetime.now(timezone.utc) + timedelta(hours=1)
+    }
+    return jwt.encode(payload, os.getenv("SECRET_KEY", "your_secret_key"), algorithm="HS256")
 
 class AttackRoutesTestCase(unittest.TestCase):
     def setUp(self):
@@ -36,6 +42,19 @@ class AttackRoutesTestCase(unittest.TestCase):
                 os.getenv("SECRET_KEY", "your_secret_key"),
                 algorithm="HS256",
             )
+    def test_perform_test_missing_username_for_brute_force(self):
+        token = generate_valid_token()
+        response = self.app.post(
+            "/attack/perform-test",
+            headers={"Authorization": token},
+            json={
+                "base_url": "http://example.com",
+                "attack_selection": {"brute_force": True}
+                # intentionally missing "username"
+            }
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("Username is required for brute force attack", response.get_data(as_text=True))
 
     def tearDown(self):
         """Teardown the test environment."""

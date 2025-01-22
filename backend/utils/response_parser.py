@@ -1,4 +1,4 @@
-from datetime import timezone
+from datetime import timezone, datetime
 
 def parse_response(response):
     """Parse the HTTP response and extract relevant details."""

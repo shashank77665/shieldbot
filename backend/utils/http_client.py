@@ -12,5 +12,7 @@ def make_request(url, data=None, method="POST", timeout=5):
             raise ValueError(f"Unsupported HTTP method: {method}")
         response.raise_for_status()  # Raise an HTTPError for bad responses (4xx/5xx)
         return response
-    except requests.RequestException as e:
+
+    except (requests.RequestException, Exception) as e:
+        # Catch both requests exceptions and any other unexpected exception
         raise RuntimeError(f"HTTP request failed: {e}")

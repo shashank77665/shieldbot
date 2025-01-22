@@ -111,6 +111,15 @@ class AuthRoutesTestCase(unittest.TestCase):
             headers={"Authorization": token},
         )
         self.assertIn(response.status_code, [200, 400])  # 400 if token is still valid
+        
+    def test_signup_missing_email(self):
+        response = self.app.post(
+            "/auth/signup",
+            json={"username": "newuser", "password": "password123"}
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("Missing fields", response.get_data(as_text=True))
+        
 
 if __name__ == "__main__":
     unittest.main()
