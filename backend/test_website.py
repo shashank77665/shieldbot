@@ -1,8 +1,8 @@
 from flask import request, jsonify
 from datetime import datetime
-from attack_scripts.brute_force import brute_force_test
-from attack_scripts.sql_injection import sql_injection_test
-from attack_scripts.dos_attack import dos_attack_test
+from backend.attack_scripts.brute_force import brute_force_test
+from backend.attack_scripts.sql_injection import sql_injection_test
+from backend.attack_scripts.dos_attack import dos_attack_test
 import logging
 
 logger = logging.getLogger("ShieldBotAPI")

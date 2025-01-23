@@ -1,5 +1,5 @@
-from utils.http_client import make_request
-from utils.response_parser import parse_response, format_log
+from backend.utils.http_client import make_request
+from backend.utils.response_parser import parse_response, format_log
 
 def sql_injection_test(base_url, options):
     payloads = options.get("payloads", ["' OR '1'='1", "' UNION SELECT NULL--"])

@@ -3,9 +3,9 @@ import jwt
 from jwt import ExpiredSignatureError, InvalidTokenError
 from datetime import datetime, timedelta, timezone
 from flask import Blueprint, request, jsonify
-from models import User
-from database import db
-from utils.hash_utils import hash_password, verify_password
+from backend.models import User
+from backend.database import db
+from backend.utils.hash_utils import hash_password, verify_password
 from dotenv import load_dotenv
 
 # Load environment variables

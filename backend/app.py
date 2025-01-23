@@ -1,17 +1,17 @@
 import os
 from flask import Flask
 from flask_cors import CORS
-from logging_config import setup_logging
-from database import db, migrate
-from app_routes.auth_routes import auth_bp
-from app_routes.attack_routes import attack_bp
+from backend.logging_config import setup_logging
+from backend.database import db, migrate
+from backend.app_routes.auth_routes import auth_bp
+from backend.app_routes.attack_routes import attack_bp
 
 # Initialize Flask App
 app = Flask(__name__)
 CORS(app)
 
 # Configure Flask App
-app.config.from_object("config.Config")
+app.config.from_object("backend.config.Config")
 
 # Set up logger
 logger = setup_logging("ShieldBotAPI")

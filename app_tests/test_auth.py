@@ -1,7 +1,7 @@
 import unittest
-from app import app, db
-from models import User
-from utils.hash_utils import hash_password
+from backend.app import app, db
+from backend.models import User
+from backend.utils.hash_utils import hash_password
 import jwt
 from datetime import datetime, timedelta, timezone
 import os

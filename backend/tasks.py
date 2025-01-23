@@ -1,5 +1,5 @@
 from celery import Celery
-from attack_scripts import brute_force, sql_injection, dos_attack
+from backend.attack_scripts import brute_force, sql_injection, dos_attack
 
 celery = Celery("tasks", broker="redis://localhost:6379/0", backend="redis://localhost:6379/0")
 

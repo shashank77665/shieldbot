@@ -1,8 +1,8 @@
 from flask import Blueprint, request, jsonify
-from tasks import run_attacks
+from backend.tasks import run_attacks
 from celery.result import AsyncResult
-from models import RequestLog, User
-from database import db
+from backend.models import RequestLog, User
+from backend.database import db
 import jwt
 from dotenv import load_dotenv
 import os
