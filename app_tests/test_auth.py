@@ -36,7 +36,11 @@ class AuthRoutesTestCase(unittest.TestCase):
     def test_signup_success(self):
         response = self.app.post(
             "/auth/signup",
-            json={"username": "newuser", "email": "new@example.com", "password": "password123"},
+            json={
+                "username": "newuser_with_a_very_long_username_exceeding_limits",
+                "email": "verylongemailaddress@example.com",
+                "password": "password123",
+            },
         )
         self.assertEqual(response.status_code, 201)
         self.assertIn("User registered successfully", response.get_data(as_text=True))
@@ -120,6 +124,28 @@ class AuthRoutesTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertIn("Missing fields", response.get_data(as_text=True))
         
+    def test_signup_truncation(self):
+        response = self.app.post(
+            "/auth/signup",
+            json={
+                "username": "newuser_with_a_very_long_username_exceeding_limits",
+                "email": "verylongemailaddress@example.com",
+                "password": "password123",
+            },
+        )
+        self.assertEqual(response.status_code, 201)
+    
+        # Debugging: Log the response JSON
+        print(response.json)
+    
+        # Define the expected truncated username
+        truncated_username = "newuser_with_a_very_long_username_exceeding_limits"[:50]
+    
+        # Check the database for the stored user
+        with self.app.application.app_context():
+            user = User.query.filter_by(username=truncated_username).first()
+            self.assertIsNotNone(user)  # Ensure the user exists
+            self.assertEqual(user.username, truncated_username)  # Verify truncation
 
 if __name__ == "__main__":
     unittest.main()

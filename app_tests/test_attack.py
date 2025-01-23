@@ -5,12 +5,15 @@ from backend.utils.hash_utils import hash_password
 from datetime import datetime, timedelta, timezone
 import jwt
 import os
+
+
 def generate_valid_token(user_id=1):
     payload = {
         "user_id": user_id,
         "exp": datetime.now(timezone.utc) + timedelta(hours=1)
     }
     return jwt.encode(payload, os.getenv("SECRET_KEY", "your_secret_key"), algorithm="HS256")
+
 
 class AttackRoutesTestCase(unittest.TestCase):
     def setUp(self):
@@ -32,29 +35,12 @@ class AttackRoutesTestCase(unittest.TestCase):
             db.session.commit()
 
             self.user = user
-            self.valid_token = jwt.encode(
-                {"user_id": user.id, "exp": datetime.now(timezone.utc) + timedelta(hours=1)},
-                os.getenv("SECRET_KEY", "your_secret_key"),
-                algorithm="HS256",
-            )
+            self.valid_token = generate_valid_token(user.id)
             self.expired_token = jwt.encode(
                 {"user_id": user.id, "exp": datetime.now(timezone.utc) - timedelta(hours=1)},
                 os.getenv("SECRET_KEY", "your_secret_key"),
                 algorithm="HS256",
             )
-    def test_perform_test_missing_username_for_brute_force(self):
-        token = generate_valid_token()
-        response = self.app.post(
-            "/attack/perform-test",
-            headers={"Authorization": token},
-            json={
-                "base_url": "http://example.com",
-                "attack_selection": {"brute_force": True}
-                # intentionally missing "username"
-            }
-        )
-        self.assertEqual(response.status_code, 400)
-        self.assertIn("Username is required for brute force attack", response.get_data(as_text=True))
 
     def tearDown(self):
         """Teardown the test environment."""
@@ -62,6 +48,21 @@ class AttackRoutesTestCase(unittest.TestCase):
             db.session.close()
             db.session.remove()
             db.drop_all()
+
+    def test_perform_test_missing_username_for_brute_force(self):
+        """Test missing username for brute force attack."""
+        token = generate_valid_token()
+        response = self.app.post(
+            "/attack/perform-test",
+            headers={"Authorization": token},
+            json={
+                "base_url": "http://example.com",
+                "attack_selection": {"brute_force": True}
+                # Intentionally missing "username"
+            },
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("Username is required for brute force attack", response.get_data(as_text=True))
 
     def test_perform_test_valid(self):
         """Test a valid attack submission."""
@@ -77,6 +78,7 @@ class AttackRoutesTestCase(unittest.TestCase):
         self.assertIn("task_id", response.get_json())
 
     def test_perform_test_missing_token(self):
+        """Test request with missing token."""
         response = self.app.post(
             "/attack/perform-test",
             json={"base_url": "http://example.com", "attack_selection": {"sql_injection": True}},
@@ -85,6 +87,7 @@ class AttackRoutesTestCase(unittest.TestCase):
         self.assertIn("Token is missing", response.get_data(as_text=True))
 
     def test_perform_test_expired_token(self):
+        """Test request with an expired token."""
         response = self.app.post(
             "/attack/perform-test",
             headers={"Authorization": self.expired_token},
@@ -103,10 +106,12 @@ class AttackRoutesTestCase(unittest.TestCase):
         self.assertIn(response.status_code, [200, 202])  # Depending on task state
 
     def test_task_status_missing_token(self):
+        """Test checking task status without token."""
         task_id = "valid_task_id_example"
         response = self.app.get(f"/attack/task-status/{task_id}")
         self.assertEqual(response.status_code, 400)
         self.assertIn("Token is missing", response.get_data(as_text=True))
+
 
 if __name__ == "__main__":
     unittest.main()

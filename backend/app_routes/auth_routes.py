@@ -17,6 +17,7 @@ def signup():
     Expects JSON input: { "username": "...", "email": "...", "password": "..." }
     """
     data = request.json
+    data = User.validate_fields(data)
     username = data.get("username")
     email = data.get("email")
     password = data.get("password")
@@ -51,6 +52,7 @@ def login():
     """
     data = request.json
     email = data.get("email")
+    email = data.get("email", "")[:120]
     password = data.get("password")
 
     # Validate input fields
