@@ -2,6 +2,10 @@
 __pycache__/
 *.py[cod]
 
+#packages
+**/Lib/
+**/lib/
+
 # Virtual Environment
 # Ignore common virtual environment folders and associated directories
 venv/
@@ -33,6 +37,7 @@ Thumbs.db
 # Flask Instance and Config Files
 instance/
 config.py
+instance/shieldbot.db
 
 # Database Files
 *.sqlite3
