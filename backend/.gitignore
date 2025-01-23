@@ -8,6 +8,7 @@ __pycache__/
 backend/Lib/
 instance/
 backend/Scripts
+migrations/
 
 # Virtual Environment
 # Ignore common virtual environment folders and associated directories
@@ -41,6 +42,7 @@ Thumbs.db
 instance/
 config.py
 instance/shieldbot.db
+backend/migrations
 
 # Database Files
 *.sqlite3

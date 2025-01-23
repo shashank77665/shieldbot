@@ -68,7 +68,7 @@ def login():
     # Generate JWT
     token = create_jwt(user.id)
 
-    return jsonify({"message": f"Welcome, {user.username}!", "token": token}), 200
+    return jsonify({"message": f"Welcome, {user.username}!", "token": token.decode('utf-8')}), 200
 
 
 @auth_bp.route("/verify-token", methods=["GET"])
