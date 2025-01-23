@@ -7,6 +7,7 @@ __pycache__/
 **/lib/
 backend/Lib/
 instance/
+backend/Scripts
 
 # Virtual Environment
 # Ignore common virtual environment folders and associated directories
