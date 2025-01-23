@@ -5,6 +5,8 @@ __pycache__/
 #packages
 **/Lib/
 **/lib/
+backend/Lib/
+instance/
 
 # Virtual Environment
 # Ignore common virtual environment folders and associated directories
