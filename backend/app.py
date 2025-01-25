@@ -5,6 +5,9 @@ from backend.logging_config import setup_logging
 from backend.database import db, migrate
 from backend.app_routes.auth_routes import auth_bp
 from backend.app_routes.attack_routes import attack_bp
+from dotenv import load_dotenv
+
+load_dotenv()  # Load .env file
 
 # Initialize Flask App
 app = Flask(__name__)
@@ -25,4 +28,4 @@ app.register_blueprint(auth_bp)
 app.register_blueprint(attack_bp)
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=True)
+    app.run(host="0.0.0.0", port=int(os.getenv("PORT", 5000)), debug=True)

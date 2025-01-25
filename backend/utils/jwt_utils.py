@@ -12,14 +12,18 @@ load_dotenv()
 SECRET_KEY = os.getenv("SECRET_KEY", "default_secret_key")
 TOKEN_EXPIRY_HOURS = int(os.getenv("TOKEN_EXPIRY_HOURS", 1))
 
-
 def create_jwt(user_id):
-    """Generate a JWT token with an expiry time."""
+    """
+    Create a JWT token for a user.
+    """
     payload = {
         "user_id": user_id,
-        "exp": datetime.now(timezone.utc) + timedelta(hours=TOKEN_EXPIRY_HOURS),
+        "exp": datetime.utcnow() + timedelta(days=1),
+        "iat": datetime.utcnow(),
     }
-    return jwt.encode(payload, SECRET_KEY, algorithm="HS256")
+    token = jwt.encode(payload, SECRET_KEY, algorithm="HS256")
+    return token  # Already a string, no need to decode
+
 
 
 def decode_and_verify_token(token):

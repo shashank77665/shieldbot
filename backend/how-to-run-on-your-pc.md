@@ -19,7 +19,7 @@ This document provides a high-level overview of how the **ShieldBot** backend fu
    - **Redis**: A fast, in-memory key-value store used by Celery as a **message broker** and for task result storage.
 
 3. **Database (PostgreSQL / SQLite in tests)**  
-   - Stores user data (`User`), test logs (`RequestLog`), and other relevant information.
+   - Stores user data (`User`), test logs (`RequestLog`), and other relevant information.  
    - In production, you might use **PostgreSQL**. In local tests or development, you can use **SQLite** for simplicity.
 
 4. **Attack Scripts**  
@@ -80,14 +80,15 @@ flask db upgrade
 
 ### **Step 6: Start Celery Worker**
 ```bash
-celery -A tasks worker --loglevel=info
+celery -A backend.tasks worker --pool=solo --loglevel=info
 ```
-- **`-A tasks`**: Tells Celery to look for tasks in the `tasks.py` module.
+- **`-A backend.tasks`**: Tells Celery to look for tasks in the `backend.tasks` module.
+- **`--pool=solo`**: Ensures compatibility with Windows systems.
 - **`--loglevel=info`**: Outputs task-related logs in the console.
 
 ### **Step 7: Start the Flask Application**
 ```bash
-python app.py
+python backend/app.py
 ```
 - By default, it runs on **`http://127.0.0.1:5000`** or **`http://localhost:5000`**.
 
@@ -201,3 +202,4 @@ With this guide, you (and others) can:
 5. **Deploy** to Docker or another production environment.  
 
 If you have questions or run into issues, refer to this document, the [README](#), or open a GitHub issue in the project’s repository. Enjoy building and testing your web application security with **ShieldBot**!
+
