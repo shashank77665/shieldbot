@@ -1,6 +1,6 @@
 import os
 from flask import Blueprint, request, jsonify
-from backend.models import User
+from backend.models import ShieldbotUser  # Updated to use ShieldbotUser
 from backend.database import db
 from backend.utils.hash_utils import hash_password, verify_password
 from backend.utils.jwt_utils import create_jwt, decode_and_verify_token
@@ -8,13 +8,21 @@ from dotenv import load_dotenv
 from jwt.exceptions import InvalidTokenError
 
 import jwt
+
+# Load environment variables
 load_dotenv()
+
 auth_bp = Blueprint("auth_v1", __name__, url_prefix="/auth")
 SECRET_KEY = os.getenv("SECRET_KEY", "fallback_secret_key")
+
+
 @auth_bp.route("/signup", methods=["POST"])
 def signup():
+    """
+    Route to register a new user.
+    """
     data = request.json
-    data = User.validate_fields(data)
+    data = ShieldbotUser.validate_fields(data)  # Updated to validate ShieldbotUser fields
     username = data.get("username")
     email = data.get("email")
     password = data.get("password")
@@ -25,24 +33,29 @@ def signup():
         return jsonify({"error": f"Missing fields: {', '.join(missing_fields)}"}), 400
 
     # Check if user exists
-    if User.query.filter((User.username == username) | (User.email == email)).first():
+    if ShieldbotUser.query.filter(
+        (ShieldbotUser.username == username) | (ShieldbotUser.email == email)
+    ).first():
         return jsonify({"error": "User already exists"}), 400
 
     # Register new user
-    user = User(
+    shieldbot_user = ShieldbotUser(
         username=username,
         email=email,
         password_hash=hash_password(password),
         profile_picture="user.jpg",
     )
-    db.session.add(user)
+    db.session.add(shieldbot_user)
     db.session.commit()
 
-    return jsonify({"message": "User registered successfully", "profile_picture": user.profile_picture}), 201
+    return jsonify({"message": "User registered successfully", "profile_picture": shieldbot_user.profile_picture}), 201
 
 
 @auth_bp.route("/login", methods=["POST"])
 def login():
+    """
+    Route to log in a user.
+    """
     data = request.json
     email = data.get("email", "")[:120]
     password = data.get("password")
@@ -52,14 +65,14 @@ def login():
     if missing_fields:
         return jsonify({"error": f"Missing fields: {', '.join(missing_fields)}"}), 400
 
-    user = User.query.filter_by(email=email).first()
-    if not user or not verify_password(user.password_hash, password):
+    # Find user and verify credentials
+    shieldbot_user = ShieldbotUser.query.filter_by(email=email).first()
+    if not shieldbot_user or not verify_password(shieldbot_user.password_hash, password):
         return jsonify({"error": "Invalid email or password"}), 401
 
-    token = create_jwt(user.id)
+    token = create_jwt(shieldbot_user.shieldbot_user_id)  # Updated to use shieldbot_user_id
 
-    return jsonify({"message": f"Welcome, {user.username}!", "token": token}), 200
-
+    return jsonify({"message": f"Welcome, {shieldbot_user.username}!", "token": token}), 200
 
 
 @auth_bp.route("/verify-token", methods=["GET"])
@@ -77,11 +90,11 @@ def verify_token_route():
         token = token.split(" ", 1)[1]
 
     # Verify the token
-    user, error = decode_and_verify_token(token)
+    shieldbot_user, error = decode_and_verify_token(token)
     if error:
         return jsonify({"error": error}), 401
 
-    return jsonify({"message": "Token is valid", "user_id": user.id}), 200
+    return jsonify({"message": "Token is valid", "user_id": shieldbot_user.shieldbot_user_id}), 200
 
 
 @auth_bp.route("/refresh-token", methods=["POST"])
@@ -100,11 +113,7 @@ def refresh_token():
     try:
         # Decode without verifying expiry
         payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"], options={"verify_exp": False})
-        new_token = create_jwt(payload["user_id"])
-
-        # Ensure the token is a string before returning
-        if isinstance(new_token, bytes):
-            new_token = new_token.decode("utf-8")
+        new_token = create_jwt(payload["shieldbot_user_id"])  # Updated to use shieldbot_user_id
 
         return jsonify({"token": new_token}), 200
     except InvalidTokenError:

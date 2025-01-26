@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from backend.tasks import run_attacks
 from celery.result import AsyncResult
-from backend.models import RequestLog, User
+from backend.models import RequestLog, ShieldbotUser
 from backend.database import db
 import jwt
 from dotenv import load_dotenv
@@ -14,21 +14,19 @@ load_dotenv()
 attack_bp = Blueprint("attack", __name__, url_prefix="/attack")
 SECRET_KEY = os.getenv("SECRET_KEY", "fallback_secret_key")
 
+
 def verify_token(token):
     if token.startswith("Bearer "):
         token = token.split(" ", 1)[1]  # Remove "Bearer" prefix
     try:
         decoded = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
-        print("Decoded Token:", decoded)
-        user = db.session.get(User, decoded["user_id"])
-        if not user:
+        shieldbot_user = db.session.get(ShieldbotUser, decoded["shieldbot_user_id"])
+        if not shieldbot_user:
             return None, "Invalid user"
-        return user, None
+        return shieldbot_user, None
     except ExpiredSignatureError:
-        print("Token has expired")
         return None, "Token has expired"
     except InvalidTokenError:
-        print("Invalid token error")
         return None, "Invalid token"
 
 
@@ -38,8 +36,8 @@ def perform_test():
     if not token:
         return jsonify({"error": "Token is missing"}), 400
 
-    user, error = verify_token(token)
-    if not user:
+    shieldbot_user, error = verify_token(token)
+    if not shieldbot_user:
         return jsonify({"error": error}), 401
 
     data = request.json
@@ -65,7 +63,13 @@ def perform_test():
         return jsonify({"error": "Failed to submit the task", "details": str(e)}), 500
 
     try:
-        log = RequestLog(user_id=user.id, base_url=base_url, test_type="dynamic", options=attack_selection, status="Pending")
+        log = RequestLog(
+            shieldbot_user_id=shieldbot_user.shieldbot_user_id,  # Updated user field
+            base_url=base_url,
+            test_type="dynamic",
+            options=attack_selection,
+            status="Pending"
+        )
         db.session.add(log)
         db.session.commit()
     except Exception as e:
@@ -73,14 +77,15 @@ def perform_test():
 
     return jsonify({"task_id": task.id, "message": "Attack task submitted successfully"}), 202
 
+
 @attack_bp.route('/task-status/<task_id>', methods=['GET'])
 def task_status(task_id):
     token = request.headers.get("Authorization")
     if not token:
         return jsonify({"error": "Token is missing"}), 400
 
-    user, error = verify_token(token)
-    if not user:
+    shieldbot_user, error = verify_token(token)
+    if not shieldbot_user:
         return jsonify({"error": error}), 401
 
     task = AsyncResult(task_id)
@@ -89,7 +94,7 @@ def task_status(task_id):
 
     if task.state == 'PENDING':
         return jsonify({"status": "Pending"}), 202
-    elif task.state == 'SUCCEDED':
+    elif task.state == 'SUCCESS':
         return jsonify({"status": "Completed", "result": task.result}), 200
     elif task.state == 'FAILURE':
         return jsonify({"status": "Failed", "error": str(task.info)}), 500

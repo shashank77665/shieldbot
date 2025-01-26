@@ -9,7 +9,7 @@ backend/Lib/
 instance/
 backend/Scripts
 migrations/
-
+htmlcov/
 # Virtual Environment
 # Ignore common virtual environment folders and associated directories
 venv/
@@ -43,6 +43,7 @@ instance/
 config.py
 instance/shieldbot.db
 backend/migrations
+migrations
 
 # Database Files
 *.sqlite3

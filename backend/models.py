@@ -1,8 +1,8 @@
 from backend.database import db
 from datetime import timezone, datetime
 
-class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+class ShieldbotUser(db.Model):
+    shieldbot_user_id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(256), nullable=False)
@@ -10,7 +10,7 @@ class User(db.Model):
     is_superuser = db.Column(db.Boolean, default=False)
 
     def __repr__(self):
-        return f"<User {self.username}>"
+        return f"<ShieldbotUser {self.username}>"
 
     @staticmethod
     def validate_fields(data):
@@ -23,7 +23,9 @@ class User(db.Model):
 
 class RequestLog(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    shieldbot_user_id = db.Column(
+        db.Integer, db.ForeignKey("shieldbot_user.shieldbot_user_id"), nullable=False
+    )
     test_type = db.Column(db.String(50), nullable=False)
     base_url = db.Column(db.Text, nullable=False)
     options = db.Column(db.JSON, nullable=True)
@@ -39,6 +41,7 @@ class RequestLog(db.Model):
         data["base_url"] = data.get("base_url", "")[:255]
         data["status"] = data.get("status", "Pending")[:50]
         return data
+
 
 class AppLog(db.Model):
     id = db.Column(db.Integer, primary_key=True)

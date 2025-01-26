@@ -1,6 +1,6 @@
 from functools import wraps
 from flask import request, jsonify
-from backend.models import User
+from backend.models import ShieldbotUser  # Updated to ShieldbotUser
 from backend.database import db
 from backend.utils.jwt_utils import decode_and_verify_token  # Reuse the JWT decoding logic
 
@@ -24,15 +24,17 @@ def authorize(required_superuser=False):
             if not token:
                 return jsonify({"error": "Token is missing"}), 401
 
-            user, error = decode_and_verify_token(token)
+            # Decode and verify JWT
+            shieldbot_user, error = decode_and_verify_token(token)  # Updated variable name
             if error:
                 return jsonify({"error": error}), 401
 
-            if required_superuser and not user.is_superuser:
+            # Check for superuser privileges if required
+            if required_superuser and not shieldbot_user.is_superuser:
                 return jsonify({"error": "Access denied. Superuser privileges required."}), 403
 
-            # Pass the user object to the route
-            request.current_user = user
+            # Attach the shieldbot_user object to the request for route access
+            request.current_shieldbot_user = shieldbot_user  # Updated to current_shieldbot_user
             return f(*args, **kwargs)
         return wrapper
     return decorator
