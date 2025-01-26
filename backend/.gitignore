@@ -8,7 +8,7 @@ __pycache__/
 backend/Lib/
 instance/
 backend/Scripts
-migrations/
+migrations
 htmlcov/
 # Virtual Environment
 # Ignore common virtual environment folders and associated directories

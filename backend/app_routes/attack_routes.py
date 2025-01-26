@@ -94,7 +94,7 @@ def task_status(task_id):
 
     if task.state == 'PENDING':
         return jsonify({"status": "Pending"}), 202
-    elif task.state == 'SUCCESS':
+    elif task.state == 'SUCCEDED':
         return jsonify({"status": "Completed", "result": task.result}), 200
     elif task.state == 'FAILURE':
         return jsonify({"status": "Failed", "error": str(task.info)}), 500

@@ -18,11 +18,19 @@ def parse_response(response):
         }
     except AttributeError as e:
         raise ValueError(f"Invalid response object: {e}")
-
 def format_log(message, details=None):
-    """Format log entries with a timestamp."""
+    """
+    Format log entries with a timestamp and optional details.
+
+    Args:
+        message (str): The log message.
+        details (dict, optional): Additional context or metadata for the log.
+
+    Returns:
+        dict: A formatted log entry with a timestamp.
+    """
     log_entry = {
-        "timestamp": str(datetime.now(timezone.utc)),
+        "timestamp": datetime.now(timezone.utc).isoformat(),  # ISO format for better compatibility
         "message": message,
     }
     if details:
