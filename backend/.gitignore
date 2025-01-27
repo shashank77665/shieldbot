@@ -18,7 +18,7 @@ Lib/
 Scripts/
 Include/
 pyvenv.cfg
-
+backend\CACHEDIR.TAG
 # Environment Variables
 .env
 .env.*
