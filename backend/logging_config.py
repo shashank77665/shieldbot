@@ -7,12 +7,11 @@ class JsonFormatter(logging.Formatter):
             "timestamp": self.formatTime(record),
             "level": record.levelname,
             "logger": record.name,
-            "message": record.getMessage(),
+            "message": record.getMessage()
         }
         if record.exc_info:
             log_record["exception"] = self.formatException(record.exc_info)
         return json.dumps(log_record)
-
 
 def setup_logging(app_name):
     handler = logging.StreamHandler()

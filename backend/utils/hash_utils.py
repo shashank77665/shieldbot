@@ -1,9 +1,8 @@
-from werkzeug.security import generate_password_hash, check_password_hash
+import bcrypt
 
-def hash_password(password):
-    hashed = generate_password_hash(password)
-    # Truncate hashed password to the database limit
-    return hashed[:256]
+def hash_password(password: str) -> str:
+    salt = bcrypt.gensalt()
+    return bcrypt.hashpw(password.encode(), salt).decode()
 
-def verify_password(hash, password):
-    return check_password_hash(hash, password)
+def verify_password(hashed: str, password: str) -> bool:
+    return bcrypt.checkpw(password.encode(), hashed.encode())

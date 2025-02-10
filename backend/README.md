@@ -54,7 +54,7 @@
 
 <h1><strong>ShieldBot</strong></h1>
 
-<p><strong>ShieldBot</strong> is a Flask-based application designed to simulate security tests, including brute force attacks, SQL injection, and DoS attack simulations. This tool is intended for ethical testing and educational purposes to evaluate the vulnerabilities of web applications.</p>
+<p><strong>ShieldBot</strong> is a Flask-based cybersecurity testing platform that simulates various website security tests (brute force, SQL injection, etc.) and generates real-time AI-driven insights via the Hugging Face API.</p>
 
 <hr />
 
@@ -94,11 +94,27 @@
 
 <h2 id="features">Features</h2>
 <ul>
-  <li><strong>Brute Force Attack Simulation</strong>: Test common password vulnerabilities.</li>
-  <li><strong>SQL Injection Simulation</strong>: Identify weak query sanitization.</li>
-  <li><strong>Denial of Service Simulation</strong>: Test server resilience under high traffic.</li>
-  <li><strong>Asynchronous Processing</strong>: Use Celery and Redis to handle large-scale tasks efficiently.</li>
-  <li><strong>Database Logging</strong>: Record detailed logs and results of all tests.</li>
+  <li><strong>Authentication & Registration:</strong>  
+  • Email/password signup (with email verification and CAPTCHA)  
+  • Google OAuth login  
+  • Password reset ("forgot password") functionality</li>
+  <li><strong>User Roles & Limitations:</strong>  
+  • Regular users can run up to 2 tests concurrently  
+  • Admins have access to all user data, test logs, and tool management functions</li>
+  <li><strong>Core App Functions:</strong>  
+  • Home page listing available tests  
+  • User dashboard with test status, logs, and AI insights  
+  • Test creation that can be run on separate threads or via Celery tasks</li>
+  <li><strong>Custom Tests Route:</strong>  
+  • Run tests with custom inputs and select which tests to skip or run  
+  • Optional installation of Linux security tools (via apt-get on Ubuntu)</li>
+  <li><strong>Linux Tools Installation:</strong>  
+  • Admin route for installing a default suite (e.g., nmap, nikto, sqlmap, gobuster, dirb, wfuzz)</li>
+  <li><strong>Deployment:</strong>  
+  • Environment variables (.env) for configuration  
+  • Database migrations using Flask-Migrate</li>
+  <li><strong>Logging & Error Handling:</strong>  
+  • Structured JSON logging for easier monitoring</li>
 </ul>
 
 <hr />
@@ -528,7 +544,7 @@ Authorization: <JWT-TOKEN>
 
 <h3>Suggested Workflow for Flutter</h3>
 <ol>
-  <li><strong>User Authentication</strong>: Sign up or log in to receive a JWT token. Save the token securely using Flutter’s secure storage (<code>flutter_secure_storage</code>).</li>
+  <li><strong>User Authentication</strong>: Sign up or log in to receive a JWT token. Save the token securely using Flutter's secure storage (<code>flutter_secure_storage</code>).</li>
   <li><strong>Authenticated Actions</strong>: Attach the JWT token as an <code>Authorization</code> header for every request to <code>/attack/*</code>.</li>
   <li><strong>Token Management</strong>: Regularly check and refresh the token using <code>/auth/refresh-token</code> before it expires.</li>
 </ol>
@@ -801,22 +817,4 @@ To help your frontend developer integrate the backend with Flutter, you can prov
 ### **Suggested Workflow for Flutter**
 1. **User Authentication**:
    - Sign up or log in to receive a JWT token.
-   - Save the token securely using Flutter’s secure storage (e.g., `flutter_secure_storage`).
-2. **Authenticated Actions**:
-   - Attach the JWT token as an `Authorization` header for every request to `/attack/*`.
-3. **Token Management**:
-   - Regularly check and refresh the token using `/auth/refresh-token` before it expires.
-
----
-
-
-
-
-## **License**
-This project is licensed under the **MIT License**.
-
----
-
-
-
-
+   - Save the token securely using Flutter's secure storage (e.g., `flutter_secure_storage`

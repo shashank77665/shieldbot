@@ -1,6 +1,6 @@
 import unittest
 from backend.app import app, db
-from backend.models import User
+from backend.models import ShieldbotUser
 from backend.utils.hash_utils import hash_password
 import jwt
 from datetime import datetime, timedelta, timezone
@@ -18,7 +18,7 @@ class AuthRoutesTestCase(unittest.TestCase):
             db.create_all()
 
             # Create a default user with a hashed password
-            user = User(
+            user = ShieldbotUser(
                 username="testuser",
                 email="test@example.com",
                 password_hash=hash_password("password123"),
@@ -143,7 +143,7 @@ class AuthRoutesTestCase(unittest.TestCase):
     
         # Check the database for the stored user
         with self.app.application.app_context():
-            user = User.query.filter_by(username=truncated_username).first()
+            user = ShieldbotUser.query.filter_by(username=truncated_username).first()
             self.assertIsNotNone(user)  # Ensure the user exists
             self.assertEqual(user.username, truncated_username)  # Verify truncation
 

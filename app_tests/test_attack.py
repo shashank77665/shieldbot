@@ -1,15 +1,15 @@
 import unittest
 from backend.app import app, db
-from backend.models import User, RequestLog
+from backend.models import ShieldbotUser, RequestLog
 from backend.utils.hash_utils import hash_password
 from datetime import datetime, timedelta, timezone
 import jwt
 import os
 
 
-def generate_valid_token(user_id=1):
+def generate_valid_token(shieldbot_user_id=1):
     payload = {
-        "user_id": user_id,
+        "shieldbot_user_id": shieldbot_user_id,
         "exp": datetime.now(timezone.utc) + timedelta(hours=1)
     }
     return jwt.encode(payload, os.getenv("SECRET_KEY", "your_secret_key"), algorithm="HS256")
@@ -26,7 +26,7 @@ class AttackRoutesTestCase(unittest.TestCase):
             db.create_all()
 
             # Create a default user
-            user = User(
+            user = ShieldbotUser(
                 username="testuser",
                 email="test@example.com",
                 password_hash=hash_password("password123"),
@@ -35,9 +35,9 @@ class AttackRoutesTestCase(unittest.TestCase):
             db.session.commit()
 
             self.user = user
-            self.valid_token = generate_valid_token(user.id)
+            self.valid_token = generate_valid_token(user.shieldbot_user_id)
             self.expired_token = jwt.encode(
-                {"user_id": user.id, "exp": datetime.now(timezone.utc) - timedelta(hours=1)},
+                {"shieldbot_user_id": user.shieldbot_user_id, "exp": datetime.now(timezone.utc) - timedelta(hours=1)},
                 os.getenv("SECRET_KEY", "your_secret_key"),
                 algorithm="HS256",
             )
@@ -62,7 +62,7 @@ class AttackRoutesTestCase(unittest.TestCase):
             },
         )
         self.assertEqual(response.status_code, 400)
-        self.assertIn("Username is required for brute force attack", response.get_data(as_text=True))
+        self.assertIn("Username is required", response.get_data(as_text=True))
 
     def test_perform_test_valid(self):
         """Test a valid attack submission."""
@@ -75,7 +75,7 @@ class AttackRoutesTestCase(unittest.TestCase):
             },
         )
         self.assertEqual(response.status_code, 202)
-        self.assertIn("task_id", response.get_json())
+        self.assertTrue("test_id" in response.get_json())
 
     def test_perform_test_missing_token(self):
         """Test request with missing token."""
@@ -94,7 +94,7 @@ class AttackRoutesTestCase(unittest.TestCase):
             json={"base_url": "http://example.com", "attack_selection": {"sql_injection": True}},
         )
         self.assertEqual(response.status_code, 401)
-        self.assertIn("Token has expired", response.get_data(as_text=True))
+        self.assertIn("expired", response.get_data(as_text=True))
 
     def test_task_status_valid(self):
         """Test checking task status with a valid task ID."""

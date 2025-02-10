@@ -1,5 +1,5 @@
 from flask import Flask
-from backend.models import User
+from backend.models import ShieldbotUser
 from backend.database import db
 from werkzeug.security import generate_password_hash
 
@@ -10,7 +10,7 @@ def create_superuser():
     username = input("Enter username: ")
     email = input("Enter email: ")
     password = input("Enter password: ")
-    superuser = User(
+    superuser = ShieldbotUser(
         username=username,
         email=email,
         password_hash=generate_password_hash(password),
