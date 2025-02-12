@@ -13,7 +13,7 @@
           "header": [
             {
               "key": "Authorization",
-              "value": "Bearer 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",
+              "value": "Bearer {{token}}",
               "type": "text"
             },
             {
