@@ -62,7 +62,7 @@ class RequestLog(db.Model):
     execution_time = db.Column(db.Float, nullable=True)
     result = db.Column(db.JSON, nullable=True)
     timestamp = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
-    celery_task_id = db.Column(db.String(64), nullable=True)
+    celery_task_id = db.Column(db.String(128), nullable=True)
     last_updated = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), 
                              onupdate=lambda: datetime.now(timezone.utc))
 
