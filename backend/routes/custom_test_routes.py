@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, session
 from backend.attack_scripts import (
     all_tests  # This now contains all test functions discovered
 )
@@ -12,7 +12,11 @@ custom_tests_bp = Blueprint("custom_tests", __name__, url_prefix="/custom-tests"
 @custom_tests_bp.route("/run", methods=["POST"])
 def run_custom_tests():
     data = request.json
-    token = request.headers.get("Authorization")
+    token = request.headers.get("Authorization") or session.get("token")
+    # Require authentication before proceeding.
+    if not token:
+        return jsonify({"error": "Authentication required. Please log in or sign up."}), 401
+
     user, error = decode_and_verify_token(token)
     if error:
         return jsonify({"error": error}), 401

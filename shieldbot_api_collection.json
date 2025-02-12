@@ -1,0 +1,340 @@
+{
+    "info": {
+      "_postman_id": "d9d24a55-3c4a-40b3-80aa-1e5c6a4d93b8",
+      "name": "Shieldbot API Collection",
+      "description": "Collection to test Shieldbot API endpoints with session management, attack tests, and admin routes.\n\nEndpoints included:\n• Auth: User Signup, User Login, Verify Token, Request Password Reset, Get Test Status\n• Tests: Create Test\n• Attack: Perform Attack Test, Simulate Attack Logs\n• Admin: View All Tests, User Activities",
+      "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "variable": [
+      {
+        "key": "token",
+        "value": ""
+      },
+      {
+        "key": "reset_token",
+        "value": ""
+      },
+      {
+        "key": "task_id",
+        "value": ""
+      },
+      {
+        "key": "test_id",
+        "value": ""
+      },
+      {
+        "key": "test_name",
+        "value": ""
+      },
+      {
+        "key": "base_url",
+        "value": "http://example.com"
+      }
+    ],
+    "item": [
+      {
+        "name": "Auth",
+        "item": [
+          {
+            "name": "User Signup",
+            "request": {
+              "method": "POST",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"username\": \"testuser\",\n  \"email\": \"testuser@example.com\",\n  \"password\": \"password123\"\n}"
+              },
+              "url": {
+                "raw": "http://localhost:5000/auth/signup",
+                "protocol": "http",
+                "host": [
+                  "localhost"
+                ],
+                "port": "5000",
+                "path": [
+                  "auth",
+                  "signup"
+                ]
+              }
+            },
+            "response": []
+          },
+          {
+            "name": "User Login",
+            "request": {
+              "method": "POST",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"email\": \"testuser@example.com\",\n  \"password\": \"password123\"\n}"
+              },
+              "url": {
+                "raw": "http://localhost:5000/auth/login",
+                "protocol": "http",
+                "host": [
+                  "localhost"
+                ],
+                "port": "5000",
+                "path": [
+                  "auth",
+                  "login"
+                ]
+              }
+            },
+            "response": []
+          },
+          {
+            "name": "Verify Token",
+            "request": {
+              "method": "GET",
+              "header": [],
+              "url": {
+                "raw": "http://localhost:5000/auth/verify-token",
+                "protocol": "http",
+                "host": [
+                  "localhost"
+                ],
+                "port": "5000",
+                "path": [
+                  "auth",
+                  "verify-token"
+                ]
+              }
+            },
+            "response": []
+          },
+          {
+            "name": "Request Password Reset",
+            "request": {
+              "method": "POST",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"email\": \"testuser@example.com\"\n}"
+              },
+              "url": {
+                "raw": "http://localhost:5000/auth/request-password-reset",
+                "protocol": "http",
+                "host": [
+                  "localhost"
+                ],
+                "port": "5000",
+                "path": [
+                  "auth",
+                  "request-password-reset"
+                ]
+              }
+            },
+            "response": []
+          },
+          {
+            "name": "Get Test Status",
+            "request": {
+              "method": "GET",
+              "header": [
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{token}}"
+                }
+              ],
+              "url": {
+                "raw": "http://localhost:5000/test/status/{{test_id}}",
+                "protocol": "http",
+                "host": [
+                  "localhost"
+                ],
+                "port": "5000",
+                "path": [
+                  "test",
+                  "status",
+                  "{{test_id}}"
+                ]
+              }
+            },
+            "response": []
+          }
+        ]
+      },
+      {
+        "name": "Tests",
+        "item": [
+          {
+            "name": "Create Test",
+            "request": {
+              "method": "POST",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{token}}"
+                }
+              ],
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"base_url\": \"{{base_url}}\",\n  \"options\": {\n    \"brute_force\": {\n      \"username\": \"admin\",\n      \"password_list\": [\"pass1\", \"pass2\"]\n    },\n    \"sql_injection\": {\n      \"endpoints\": [\"/search\"],\n      \"param_name\": \"q\"\n    },\n    \"dos_attack\": {\n      \"request_count\": 10\n    },\n    \"xss_attack\": {\n      \"endpoint\": \"/search\",\n      \"param_name\": \"q\"\n    },\n    \"directory_traversal\": {\n      \"endpoint\": \"/download\",\n      \"param_name\": \"file\"\n    },\n    \"command_injection\": {\n      \"endpoint\": \"/execute\",\n      \"param_name\": \"cmd\"\n    },\n    \"csrf_attack\": {\n      \"endpoint\": \"/transfer\",\n      \"data\": { \"amount\": \"1000\" }\n    }\n  }\n}"
+              },
+              "url": {
+                "raw": "http://localhost:5000/test/create",
+                "protocol": "http",
+                "host": [
+                  "localhost"
+                ],
+                "port": "5000",
+                "path": [
+                  "test",
+                  "create"
+                ]
+              }
+            },
+            "response": []
+          }
+        ]
+      },
+      {
+        "name": "Attack",
+        "item": [
+          {
+            "name": "Perform Attack Test",
+            "request": {
+              "method": "POST",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{token}}"
+                }
+              ],
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"base_url\": \"{{base_url}}\",\n  \"options\": {\n    \"brute_force\": {\n      \"username\": \"admin\",\n      \"password_list\": [\"pass1\", \"pass2\"]\n    },\n    \"sql_injection\": {\n      \"endpoints\": [\"/search\"],\n      \"param_name\": \"q\"\n    },\n    \"dos_attack\": {\n      \"request_count\": 10\n    },\n    \"xss_attack\": {\n      \"endpoint\": \"/search\",\n      \"param_name\": \"q\"\n    },\n    \"directory_traversal\": {\n      \"endpoint\": \"/download\",\n      \"param_name\": \"file\"\n    },\n    \"command_injection\": {\n      \"endpoint\": \"/execute\",\n      \"param_name\": \"cmd\"\n    },\n    \"csrf_attack\": {\n      \"endpoint\": \"/transfer\",\n      \"data\": { \"amount\": \"1000\" }\n    }\n  },\n  \"user_id\": 1\n}"
+              },
+              "url": {
+                "raw": "http://localhost:5000/attack/perform-test",
+                "protocol": "http",
+                "host": [
+                  "localhost"
+                ],
+                "port": "5000",
+                "path": [
+                  "attack",
+                  "perform-test"
+                ]
+              }
+            },
+            "response": []
+          },
+          {
+            "name": "Simulate Attack Logs",
+            "request": {
+              "method": "GET",
+              "header": [
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{token}}"
+                }
+              ],
+              "url": {
+                "raw": "http://localhost:5000/attack/logs?base_url={{base_url}}&attacks=brute_force,sql_injection,xss_attack,directory_traversal,csrf_attack",
+                "protocol": "http",
+                "host": [
+                  "localhost"
+                ],
+                "port": "5000",
+                "path": [
+                  "attack",
+                  "logs"
+                ],
+                "query": [
+                  {
+                    "key": "base_url",
+                    "value": "{{base_url}}"
+                  },
+                  {
+                    "key": "attacks",
+                    "value": "brute_force,sql_injection,xss_attack,directory_traversal,csrf_attack"
+                  }
+                ]
+              }
+            },
+            "response": []
+          }
+        ]
+      },
+      {
+        "name": "Admin",
+        "item": [
+          {
+            "name": "View All Tests",
+            "request": {
+              "method": "GET",
+              "header": [
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{token}}"
+                }
+              ],
+              "url": {
+                "raw": "http://localhost:5000/admin/tests",
+                "protocol": "http",
+                "host": [
+                  "localhost"
+                ],
+                "port": "5000",
+                "path": [
+                  "admin",
+                  "tests"
+                ]
+              }
+            },
+            "response": []
+          },
+          {
+            "name": "User Activities",
+            "request": {
+              "method": "GET",
+              "header": [
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{token}}"
+                }
+              ],
+              "url": {
+                "raw": "http://localhost:5000/admin/user-activities",
+                "protocol": "http",
+                "host": [
+                  "localhost"
+                ],
+                "port": "5000",
+                "path": [
+                  "admin",
+                  "user-activities"
+                ]
+              }
+            },
+            "response": []
+          }
+        ]
+      }
+    ]
+  }

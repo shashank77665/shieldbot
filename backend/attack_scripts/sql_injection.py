@@ -5,7 +5,13 @@ from .utils import create_result
 def sql_injection_test(base_url, options):
     """
     Attempt basic SQL injection attacks on given endpoints.
-    Returns a standardized result dictionary.
+    
+    Args:
+        base_url (str): Target URL.
+        options (dict): Should include "endpoints" and "param_name".
+    
+    Returns:
+        dict: Standardized result dictionary.
     """
     result_logs = []
     # A minimal set of payloads for demonstration.
@@ -46,8 +52,17 @@ def sql_injection_test(base_url, options):
                     details={"error": str(e), "payload": payload}
                 ))
     
+    # Ensure any log entry (even if a dict) is converted to lower-case text for the check.
+    vulnerability_detected = any(
+        "vulnerability detected" in (
+            log["message"].lower() if isinstance(log, dict) and "message" in log 
+            else str(log).lower()
+        )
+        for log in result_logs
+    )
+    
     return create_result(
         logs=result_logs,
         score=8,
-        success=True if any("vulnerability detected" in log.lower() for log in result_logs) else False
+        success=True if vulnerability_detected else False
     )

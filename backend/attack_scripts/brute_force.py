@@ -4,7 +4,13 @@ from .utils import create_result
 def brute_force_test(base_url, options):
     """
     Perform a brute force attack on the given URL using the specified options.
-    Returns a standardized result dictionary.
+    
+    Args:
+        base_url (str): Target URL.
+        options (dict): Should include "username", "password_list", optional "login_endpoint", and "timeout".
+    
+    Returns:
+        dict: Standardized result dictionary.
     """
     username = options.get("username")
     password_list = options.get("password_list", [])

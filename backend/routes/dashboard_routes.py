@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, session
 from backend.models import RequestLog, ShieldbotUser
 from backend.utils.jwt_utils import decode_and_verify_token
 
@@ -6,15 +6,14 @@ dashboard_bp = Blueprint("dashboard", __name__, url_prefix="/dashboard")
 
 @dashboard_bp.route("/", methods=["GET"])
 def dashboard():
-    token = request.headers.get("Authorization")
+    token = request.headers.get("Authorization") or session.get("token")
     if not token:
-        return jsonify({"error": "Token is missing"}), 401
-    
+        return jsonify({"error": "Authentication required. Please log in or sign up."}), 401
+
     shieldbot_user, error = decode_and_verify_token(token)
     if error:
         return jsonify({"error": error}), 401
 
-    # Get test logs for this user (ordered by most recent)
     tests = RequestLog.query.filter_by(
         shieldbot_user_id=shieldbot_user.shieldbot_user_id
     ).order_by(RequestLog.timestamp.desc()).all()
@@ -22,17 +21,17 @@ def dashboard():
         "test_id": test.id,
         "base_url": test.base_url,
         "status": test.status,
-        "timestamp": test.timestamp.isoformat(),
+        "last_updated": test.last_updated.isoformat() if test.last_updated else test.timestamp.isoformat(),
         "test_type": test.test_type
     } for test in tests]
 
-    # Count currently running tests
     running_count = RequestLog.query.filter_by(
         shieldbot_user_id=shieldbot_user.shieldbot_user_id, status="Running"
     ).count()
     
     dashboard_info = {
         "username": shieldbot_user.username,
+        "profile_picture": shieldbot_user.profile_picture,
         "total_tests": len(tests),
         "running_tests": running_count,
         "tests": tests_summary
@@ -42,6 +41,10 @@ def dashboard():
 
 @dashboard_bp.route("/home", methods=["GET"])
 def home():
+    token = request.headers.get("Authorization") or session.get("token")
+    if not token:
+        return jsonify({"error": "Authentication required. Please log in or sign up."}), 401
+
     available_attacks = [
         {"name": "Brute Force Attack", "description": "Test common credentials using brute force."},
         {"name": "SQL Injection", "description": "Test for SQL injection vulnerabilities."},

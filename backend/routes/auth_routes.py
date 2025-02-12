@@ -1,13 +1,15 @@
+# backend/routes/auth_routes.py
 import os
-from flask import Blueprint, request, jsonify
-from backend.models import ShieldbotUser  # Use ShieldbotUser
+from flask import Blueprint, request, jsonify, session, current_app, redirect, url_for
+from backend.models import ShieldbotUser
 from backend.database import db
 from backend.utils.hash_utils import hash_password, verify_password
 from backend.utils.jwt_utils import create_jwt, decode_and_verify_token
 from dotenv import load_dotenv
 from jwt.exceptions import InvalidTokenError
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 import jwt
+from backend.utils.optional_decorators import google_oauth_required, captcha_required
 
 # Load environment variables
 load_dotenv()
@@ -19,15 +21,20 @@ RESET_TOKEN_EXPIRATION = 3600  # 1 hour expiration for reset tokens
 def create_reset_token(user_id):
     payload = {
         "shieldbot_user_id": user_id,
-        "exp": datetime.utcnow() + timedelta(seconds=RESET_TOKEN_EXPIRATION)
+        "exp": datetime.now(UTC) + timedelta(seconds=RESET_TOKEN_EXPIRATION)
     }
     return jwt.encode(payload, SECRET_KEY, algorithm="HS256")
 
 @auth_bp.route("/signup", methods=["POST"])
 def signup():
     """
-    Route to register a new user.
+    Register a new user and automatically log them in.
+    If a user is already logged in (active session), redirect to dashboard.
     """
+    # Check if a user is already logged in
+    if session.get("user_id"):
+        return jsonify({"message": "Already logged in", "redirect_url": "/dashboard"}), 200
+
     data = request.json
     data = ShieldbotUser.validate_fields(data)
     username = data.get("username")
@@ -39,7 +46,7 @@ def signup():
     if missing_fields:
         return jsonify({"error": f"Missing fields: {', '.join(missing_fields)}"}), 400
 
-    # Check if user exists
+    # Check if the user already exists
     if ShieldbotUser.query.filter(
         (ShieldbotUser.username == username) | (ShieldbotUser.email == email)
     ).first():
@@ -50,59 +57,84 @@ def signup():
         username=username,
         email=email,
         password_hash=hash_password(password),
-        profile_picture="user.jpg",
+        profile_picture="user.jpg"
     )
     db.session.add(shieldbot_user)
     db.session.commit()
 
-    return jsonify({"message": "User registered successfully", "profile_picture": shieldbot_user.profile_picture}), 201
+    # Automatically log in the new user by creating a JWT token and setting session variables.
+    token = create_jwt(shieldbot_user.id)
+    session["user_id"] = shieldbot_user.id
+    session["token"] = token
+    session.permanent = True
 
+    return jsonify({
+        "message": "User registered and logged in successfully",
+        "profile_picture": shieldbot_user.profile_picture,
+        "token": token,
+        "user": {
+            "id": shieldbot_user.id,
+            "email": shieldbot_user.email,
+            "username": shieldbot_user.username
+        }
+    }), 201
 
 @auth_bp.route("/login", methods=["POST"])
 def login():
     """
-    Route to log in a user.
+    Log in an existing user.
+    If the user is already logged in (active session), redirect to dashboard.
     """
+    # If there is already an active session, do not require a new login.
+    if session.get("user_id"):
+        return jsonify({"message": "Already logged in", "redirect_url": "/dashboard"}), 200
+
+    # Clear any existing session first (defensive measure)
+    session.clear()
+
     data = request.json
     email = data.get("email", "")[:120]
     password = data.get("password")
 
-    # Validate input fields
     missing_fields = [field for field in ["email", "password"] if not data.get(field)]
     if missing_fields:
         return jsonify({"error": f"Missing fields: {', '.join(missing_fields)}"}), 400
 
-    # Find user and verify credentials
-    shieldbot_user = ShieldbotUser.query.filter_by(email=email).first()
-    if not shieldbot_user or not verify_password(shieldbot_user.password_hash, password):
-        return jsonify({"error": "Invalid email or password"}), 401
-
-    token = create_jwt(shieldbot_user.shieldbot_user_id)  # Updated to use shieldbot_user_id
-
-    return jsonify({"message": f"Welcome, {shieldbot_user.username}!", "token": token}), 200
-
-
-@auth_bp.route("/request-password-reset", methods=["POST"])
-def request_password_reset():
-    """
-    Request a password reset token. In production, this should send an email with a link.
-    For demonstration, we return the token directly.
-    """
-    data = request.json
-    email = data.get("email")
-    
-    if not email:
-        return jsonify({"error": "Email is required"}), 400
-
+    # Verify user exists and password is correct
     user = ShieldbotUser.query.filter_by(email=email).first()
-    # Do not reveal whether the email exists for security reasons.
-    if user:
-        reset_token = create_reset_token(user.shieldbot_user_id)
-        # In production, an email would be sent containing the reset link.
-        return jsonify({"message": "Password reset token generated. (In production, an email would be sent.)", "reset_token": reset_token}), 200
-    else:
-        return jsonify({"message": "If the email exists, a reset token will be sent."}), 200
+    if not user or not verify_password(password, user.password_hash):
+        return jsonify({"error": "Invalid credentials"}), 401
 
+    # Create JWT token
+    token = create_jwt(user.id)
+    session["user_id"] = user.id
+    session["token"] = token
+    session.permanent = True
+
+    return jsonify({
+        "message": "Logged in successfully",
+        "token": token,
+        "user": {
+            "id": user.id,
+            "email": user.email,
+            "username": user.username
+        }
+    }), 200
+
+@auth_bp.route("/logout", methods=["POST"])
+def logout():
+    """
+    Log out the user by clearing the session.
+    """
+    if "user_id" not in session:
+        return jsonify({"error": "No active session"}), 400
+        
+    # Clear the entire session
+    session.clear()
+    
+    return jsonify({
+        "message": "Logged out successfully"
+    }), 200
 
 @auth_bp.route("/reset-password", methods=["POST"])
 def reset_password():
@@ -133,47 +165,44 @@ def reset_password():
     db.session.commit()
     return jsonify({"message": "Password reset successfully"}), 200
 
-
 @auth_bp.route("/verify-token", methods=["GET"])
 def verify_token_route():
     """
-    Route to verify the JWT token.
-    Expects the Authorization header to contain the token.
+    Verify the current session's JWT token.
+    This endpoint checks the session for a stored token rather than relying on the Authorization header.
     """
-    token = request.headers.get("Authorization")
+    # Retrieve the token from the session object.
+    token = session.get("token")
     if not token:
-        return jsonify({"error": "Token is missing"}), 400
+        return jsonify({"error": "No active session. Please log in."}), 401
 
-    # Remove "Bearer " prefix if present
-    if token.startswith("Bearer "):
-        token = token.split(" ", 1)[1]
-
-    # Verify the token
     shieldbot_user, error = decode_and_verify_token(token)
     if error:
         return jsonify({"error": error}), 401
 
-    return jsonify({"message": "Token is valid", "user_id": shieldbot_user.shieldbot_user_id}), 200
-
+    return jsonify({
+        "message": "Token is valid",
+        "user_id": shieldbot_user.id,
+        "username": shieldbot_user.username
+    }), 200
 
 @auth_bp.route("/refresh-token", methods=["POST"])
 def refresh_token():
     """
-    Route to refresh the JWT token if it has expired.
+    Refresh the JWT token by decoding the existing token and issuing a new one.
     """
     token = request.headers.get("Authorization")
     if not token:
         return jsonify({"error": "Token is missing"}), 400
 
-    # Remove "Bearer " prefix if present
     if token.startswith("Bearer "):
         token = token.split(" ", 1)[1]
 
     try:
-        # Decode without verifying expiry
         payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"], options={"verify_exp": False})
-        new_token = create_jwt(payload["shieldbot_user_id"])  # Updated to use shieldbot_user_id
-
+        # Use the consistent payload key "user_id"
+        new_token = create_jwt(payload["user_id"])
+        session["token"] = new_token
         return jsonify({"token": new_token}), 200
     except InvalidTokenError:
         return jsonify({"error": "Invalid token"}), 401

@@ -4,7 +4,13 @@ from .utils import create_result
 def command_injection_test(base_url, options=None):
     """
     Tests for command injection by sending OS command separators.
-    Returns logs, score, and success flag.
+    
+    Args:
+        base_url (str): Target URL.
+        options (dict, optional): May include "endpoint" and "param_name".
+    
+    Returns:
+        dict: Standardized result dictionary.
     """
     if options is None:
         options = {}

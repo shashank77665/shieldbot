@@ -3,8 +3,14 @@ from .utils import create_result
 
 def directory_traversal_test(base_url, options=None):
     """
-    Tests for directory traversal by sending common file path patterns 
-    (e.g., ../../etc/passwd). Returns a standardized result dictionary.
+    Tests for directory traversal by sending common file path payloads.
+    
+    Args:
+        base_url (str): Target URL.
+        options (dict, optional): May include "endpoint" and "param_name".
+    
+    Returns:
+        dict: Standardized result dictionary.
     """
     if options is None:
         options = {}

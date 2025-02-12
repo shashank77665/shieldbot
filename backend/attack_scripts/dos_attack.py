@@ -5,7 +5,13 @@ from .utils import create_result
 def dos_attack_test(base_url, options):
     """
     Simulate a DoS attack by sending multiple requests.
-    Returns a standardized result dictionary.
+    
+    Args:
+        base_url (str): Target URL.
+        options (dict): Should include "request_count".
+    
+    Returns:
+        dict: Standardized result dictionary.
     """
     request_count = options.get("request_count", 10)
     result_logs = []

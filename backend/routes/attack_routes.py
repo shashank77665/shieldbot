@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, session
 from backend.tasks import run_attacks
 from celery.result import AsyncResult
 from backend.models import RequestLog, ShieldbotUser
@@ -39,9 +39,10 @@ def verify_token(token):
 
 @attack_bp.route('/perform-test', methods=['POST'])
 def perform_test():
-    token = request.headers.get("Authorization")
+    # Try to obtain token from Authorization header; if not provided, check session.
+    token = request.headers.get("Authorization") or session.get("token")
     if not token:
-        return jsonify({"error": "Token is missing"}), 400
+        return jsonify({"error": "Authentication required. Please log in or sign up."}), 401
 
     shieldbot_user, error = verify_token(token)
     if not shieldbot_user:
@@ -56,7 +57,7 @@ def perform_test():
     if not is_valid_url(base_url):
         return jsonify({"error": "Invalid URL provided"}), 400
 
-    # Enforce two concurrent tests per user.
+    # Enforce a limit on concurrent tests per user.
     running_tests_count = RequestLog.query.filter_by(
         shieldbot_user_id=shieldbot_user.shieldbot_user_id, status="Running"
     ).count()
@@ -88,9 +89,9 @@ def perform_test():
 
 @attack_bp.route('/task-status/<task_id>', methods=['GET'])
 def task_status(task_id):
-    token = request.headers.get("Authorization")
+    token = request.headers.get("Authorization") or session.get("token")
     if not token:
-        return jsonify({"error": "Token is missing"}), 400
+        return jsonify({"error": "Authentication required. Please log in or sign up."}), 401
 
     shieldbot_user, error = verify_token(token)
     if not shieldbot_user:
@@ -108,3 +109,64 @@ def task_status(task_id):
         return jsonify({"status": "Failed", "error": str(task.info)}), 500
     else:
         return jsonify({"status": task.state}), 200
+
+
+@attack_bp.route('/start', methods=['POST'])
+def start_attack():
+    data = request.json
+    token = request.headers.get("Authorization") or session.get("token")
+    if not token:
+        return jsonify({"error": "Authentication required. Please log in or sign up."}), 401
+
+    shieldbot_user, error = verify_token(token)
+    if not shieldbot_user:
+        return jsonify({"error": error}), 401
+
+    base_url = data.get("base_url")
+    attack_type = data.get("attack_type")
+    options = data.get("options", {})
+
+    if not base_url:
+        return jsonify({"error": "Base URL is required."}), 400
+    if not is_valid_url(base_url):
+        return jsonify({"error": "Invalid URL provided."}), 400
+    if not attack_type:
+        return jsonify({"error": "Attack type is required."}), 400
+
+    allowed_attacks = [
+        "Brute Force Attack",
+        "SQL Injection",
+        "DoS Attack",
+        "XSS Attack",
+        "Directory Traversal",
+        "Command Injection",
+        "CSRF Attack",
+        "Vulnerability Scan",
+        "Port Scan",
+        "Social Engineering Simulation"
+    ]
+
+    if attack_type not in allowed_attacks:
+        return jsonify({
+            "error": "Invalid attack type. Allowed types: " + ", ".join(allowed_attacks)
+        }), 400
+
+    # Log the attack request with status "Running".
+    new_log = RequestLog(
+        shieldbot_user_id=shieldbot_user.shieldbot_user_id,
+        base_url=base_url,
+        test_type=attack_type,
+        options=options,
+        status="Running"
+    )
+    db.session.add(new_log)
+    db.session.commit()
+
+    # Spawn a new thread to run the attack.
+    thread = threading.Thread(
+        target=run_attacks,
+        args=(new_log.id, base_url, options, shieldbot_user.shieldbot_user_id, attack_type)
+    )
+    thread.start()
+
+    return jsonify({"attack_id": new_log.id, "message": "Attack initiated successfully"}), 202

@@ -1,0 +1,46 @@
+{
+    "info": {
+      "_postman_id": "e7367c90-ccec-45be-b6ec-0f3f201c9fa5",
+      "name": "HuggingFace Inference",
+      "description": "Collection to test Hugging Face Inference API with GPT-2",
+      "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+      {
+        "name": "GPT-2 Inference Test",
+        "request": {
+          "method": "POST",
+          "header": [
+            {
+              "key": "Authorization",
+              "value": "Bearer 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",
+              "type": "text"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json",
+              "type": "text"
+            }
+          ],
+          "body": {
+            "mode": "raw",
+            "raw": "{\n    \"inputs\": \"Test prompt\"\n}"
+          },
+          "url": {
+            "raw": "https://api-inference.huggingface.co/models/gpt2",
+            "protocol": "https",
+            "host": [
+              "api-inference",
+              "huggingface",
+              "co"
+            ],
+            "path": [
+              "models",
+              "gpt2"
+            ]
+          }
+        },
+        "response": []
+      }
+    ]
+  }

@@ -4,7 +4,13 @@ from .utils import create_result
 def csrf_attack_test(base_url, options=None):
     """
     Demonstrates a CSRF test.
-    Returns a standardized result dictionary.
+    
+    Args:
+        base_url (str): Target URL.
+        options (dict, optional): May include "endpoint" and "data" parameters.
+    
+    Returns:
+        dict: Standardized result dictionary.
     """
     if options is None:
         options = {}

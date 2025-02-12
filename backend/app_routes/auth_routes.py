@@ -6,7 +6,7 @@ from backend.utils.hash_utils import hash_password, verify_password
 from backend.utils.jwt_utils import create_jwt, decode_and_verify_token
 from dotenv import load_dotenv
 from jwt.exceptions import InvalidTokenError
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 import jwt
 
 # Load environment variables
@@ -19,7 +19,7 @@ RESET_TOKEN_EXPIRATION = 3600  # 1 hour expiration for reset tokens
 def create_reset_token(user_id):
     payload = {
         "shieldbot_user_id": user_id,
-        "exp": datetime.utcnow() + timedelta(seconds=RESET_TOKEN_EXPIRATION)
+        "exp": datetime.now(UTC) + timedelta(seconds=RESET_TOKEN_EXPIRATION)
     }
     return jwt.encode(payload, SECRET_KEY, algorithm="HS256")
 

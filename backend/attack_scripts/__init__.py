@@ -9,6 +9,16 @@ and added to the package namespace.
 import pkgutil
 import importlib
 import inspect
+from .ai_integration import ai_decision
+from .brute_force import brute_force_test
+from .command_injection_test import command_injection_test as command_injection
+from .csrf_attack_test import csrf_attack_test
+from .custom_api import custom_api_test
+from .dos_attack import dos_attack_test
+from .directory_traversal_test import directory_traversal_test
+from .sql_injection import sql_injection_test
+from .xss_attack_test import xss_attack_test
+from . import dummy_tests
 
 # Dictionary to store all test functions (e.g., {"brute_force_test": brute_force_test, ...})
 test_functions = {}
@@ -24,7 +34,16 @@ for loader, module_name, is_pkg in pkgutil.iter_modules(__path__):
 # Add discovered functions into the package's namespace
 globals().update(test_functions)
 
-__all__ = list(test_functions.keys())
+__all__ = [
+    'brute_force',
+    'sql_injection', 
+    'dos_attack',
+    'command_injection',
+    'csrf_attack',
+    'dummy_tests',
+    'directory_traversal_test',
+    'xss_attack_test'
+]
 
 # Optionally, expose a variable to let other parts of your app iterate easily over all tests
 all_tests = test_functions
