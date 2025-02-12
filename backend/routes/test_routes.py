@@ -1,7 +1,7 @@
 import threading, time, json, requests, logging
 from flask import Blueprint, request, jsonify, current_app, session
 from datetime import datetime, UTC
-from backend.models import Test, User
+from backend.models import Test, User, ShieldbotUser
 from backend.database import db
 from backend.utils.jwt_utils import decode_jwt
 from backend.config import Config
@@ -11,6 +11,7 @@ from backend.test_executor import execute_test
 test_bp = Blueprint("test", __name__, url_prefix="/test")
 logger = logging.getLogger(__name__)
 hf_key = Config.HF_API_KEY
+
 def get_user_from_token(req):
     token = req.headers.get("Authorization") or session.get("token")
     if not token:

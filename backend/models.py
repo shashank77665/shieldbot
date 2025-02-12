@@ -47,7 +47,7 @@ class Test(db.Model):
     ai_insights = db.Column(db.JSON, nullable=True)
     start_time = db.Column(db.DateTime, default=datetime.utcnow)
     end_time = db.Column(db.DateTime, nullable=True)
-    celery_task_id = db.Column(db.String(64), nullable=True)
+    celery_task_id = db.Column(db.String(128), nullable=True)
     last_updated = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 class RequestLog(db.Model):

@@ -1,8 +1,10 @@
 from flask import Blueprint, request, jsonify, session
-from backend.models import RequestLog, ShieldbotUser
+from backend.models import Test, ShieldbotUser
 from backend.utils.jwt_utils import decode_and_verify_token
+import logging
 
 dashboard_bp = Blueprint("dashboard", __name__, url_prefix="/dashboard")
+logger = logging.getLogger(__name__)
 
 @dashboard_bp.route("/", methods=["GET"])
 def dashboard():
@@ -14,19 +16,28 @@ def dashboard():
     if error:
         return jsonify({"error": error}), 401
 
-    tests = RequestLog.query.filter_by(
-        shieldbot_user_id=shieldbot_user.shieldbot_user_id
-    ).order_by(RequestLog.timestamp.desc()).all()
+    try:
+        # Query all tests for the current user from the Test model, ordering by the most recent
+        tests = Test.query.filter_by(user_id=shieldbot_user.id).order_by(Test.start_time.desc()).all()
+        logger.debug("Fetched %d tests for user_id %s", len(tests), shieldbot_user.id)
+    except Exception as err:
+        logger.exception("Error fetching tests for user_id %s: %s", shieldbot_user.id, err)
+        return jsonify({"error": "Error fetching tests"}), 500
+
     tests_summary = [{
         "test_id": test.id,
+        "test_name": test.test_name,
         "base_url": test.base_url,
         "status": test.status,
-        "last_updated": test.last_updated.isoformat() if test.last_updated else test.timestamp.isoformat(),
-        "test_type": test.test_type
+        "start_time": test.start_time.isoformat() if test.start_time else None,
+        "end_time": test.end_time.isoformat() if test.end_time else None,
+        "logs": test.logs,
+        "ai_insights": test.ai_insights
     } for test in tests]
 
-    running_count = RequestLog.query.filter_by(
-        shieldbot_user_id=shieldbot_user.shieldbot_user_id, status="Running"
+    running_count = Test.query.filter(
+        Test.user_id == shieldbot_user.id,
+        Test.status.in_(["Pending", "Running"])
     ).count()
     
     dashboard_info = {

@@ -17,12 +17,26 @@ from backend.attack_scripts.dummy_tests import vulnerability_scan_test, port_sca
 
 logger = logging.getLogger(__name__)
 
+def update_test_logs(test_id, logs):
+    """
+    Updates the Test record in the database with the current logs and refreshes the last_updated timestamp.
+    
+    Args:
+        test_id: Identifier for the test.
+        logs: Dictionary containing the test logs.
+    """
+    test_record = Test.query.get(test_id)
+    if test_record:
+        test_record.logs = logs
+        test_record.last_updated = datetime.now(UTC)
+        db.session.commit()
+
 def execute_test(test_id, base_url, options, user_id):
     """
     Execute the comprehensive cybersecurity test on a new thread.
     Sequentially calls all subtests and, if HF_API_KEY is provided, integrates AI decision making.
     
-    After each subtest, it updates the test's heartbeat and checks if the test was aborted.
+    After each subtest, it updates the test's heartbeat and stores the logs in the database.
     """
     # Local import to avoid circular dependencies.
     from backend.app import app
@@ -46,28 +60,39 @@ def execute_test(test_id, base_url, options, user_id):
                 ("social_engineering", social_engineering_test, "social_engineering")
             ]
             
+            # Execute each subtest if the test has not been aborted.
             for label, test_func, opt_key in subtests:
                 if check_if_aborted(test_id):
                     final_status = "Aborted"
                     results["abort"] = f"Test aborted before running {label}"
                     logger.info("Aborting test %s before executing %s", test_id, label)
                     break
+
                 # Ensure that the options for the subtest are a dict.
                 subtest_opts = options.get(opt_key, {})
                 if not isinstance(subtest_opts, dict):
                     logger.warning("Expected options for subtest '%s' to be a dict but got %s. Resetting to empty dict.",
                                    opt_key, type(subtest_opts))
                     subtest_opts = {}
+
+                # Execute the subtest and update results.
                 results[label] = test_func(base_url, subtest_opts)
-                update_heartbeat(test_id)
+                update_test_logs(test_id, results)  # Store logs after each subtest.
+                logger.info("Updated logs after subtest %s: %s", label, results[label])
+                
             else:
+                # Before sending logs for AI integration, ensure they are stored in DB.
+                update_test_logs(test_id, results)
+                
                 # Only if all tests ran without interruption do we run AI integration.
                 hf_key = os.getenv("HF_API_KEY")
                 if hf_key:
                     from backend.attack_scripts.ai_integration import ai_decision
                     ai_result = ai_decision(results, hf_key)
                     results["ai_assessment"] = ai_result
-                update_heartbeat(test_id)
+                    logger.info("AI integration result: %s", ai_result)
+                update_test_logs(test_id, results)
+                
         except Exception as e:
             logger.exception("Error executing test id %s", test_id)
             results = {"error": "Internal error. Please contact support."}
@@ -75,14 +100,17 @@ def execute_test(test_id, base_url, options, user_id):
         
         # Optionally simulate a delay at the end.
         time.sleep(2)
-        update_heartbeat(test_id)
+        update_test_logs(test_id, results)
         
+        # Retrieve the test record and update final details, including AI insights.
         test_record = Test.query.get(test_id)
         if test_record:
-            test_record.result = results
+            test_record.logs = results  # Save the final logs.
+            test_record.ai_insights = results.get("ai_assessment")  # Store AI insights separately.
             test_record.status = final_status
             test_record.end_time = datetime.now(UTC)
             db.session.commit()
+            logger.info("Final test results for test_id %s: logs=%s, ai_insights=%s", test_id, results, results.get("ai_assessment"))
 
 def update_heartbeat(test_id):
     """Helper function to update the last_updated timestamp for the test."""
