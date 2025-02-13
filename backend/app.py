@@ -7,10 +7,14 @@ import os
 from dotenv import load_dotenv
 from threading import Thread
 from backend.monitor import monitor_running_tasks
+from flask_cors import CORS
 
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
+
+    # Enable CORS for all domains (for development) and allow credentials (so cookies/sessions are sent)
+    CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}}, supports_credentials=True)
 
     # Set testing config if FLASK_ENV environment variable is 'testing'
     if os.getenv("FLASK_ENV") == "testing":
@@ -76,4 +80,4 @@ if __name__ == '__main__':
     monitor_thread = Thread(target=monitor_running_tasks, args=(app,), daemon=True)
     monitor_thread.start()
     
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=False)

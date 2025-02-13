@@ -68,6 +68,10 @@ def signup():
     session["token"] = token
     session.permanent = True
 
+    # After setting the session, the session cookie is set in the response.
+    # You can include the cookie value in the JSON response if desired:
+    session_cookie = request.cookies.get(current_app.session_cookie_name)
+
     return jsonify({
         "message": "User registered and logged in successfully",
         "profile_picture": shieldbot_user.profile_picture,
@@ -76,7 +80,8 @@ def signup():
             "id": shieldbot_user.id,
             "email": shieldbot_user.email,
             "username": shieldbot_user.username
-        }
+        },
+        "session_id": session_cookie
     }), 201
 
 @auth_bp.route("/login", methods=["POST"])
@@ -132,9 +137,12 @@ def logout():
     # Clear the entire session
     session.clear()
     
-    return jsonify({
+    # Optionally, you can explicitly expire the session cookie by setting its expiry in the response.
+    response = jsonify({
         "message": "Logged out successfully"
-    }), 200
+    })
+    response.delete_cookie(current_app.session_cookie_name)
+    return response, 200
 
 @auth_bp.route("/reset-password", methods=["POST"])
 def reset_password():
