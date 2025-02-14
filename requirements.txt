@@ -5,6 +5,7 @@ Flask-SQLAlchemy==2.5.1
 Flask-Migrate==4.0.5
 Flask-Cors==4.0.0
 Flask-WTF==1.2.1
+Flask-Session==0.4.0  # For server-side session management
 
 # Database
 SQLAlchemy==1.4.27
@@ -37,3 +38,6 @@ python-dateutil==2.8.2
 # Development Tools
 black==23.12.1
 flake8==7.0.0
+
+# Additional Libraries
+transformers==4.31.0  # For NLP models by Hugging Face
