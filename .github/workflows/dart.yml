@@ -1,0 +1,49 @@
+name: Build and Deploy Flutter Web
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    name: Build and Deploy Flutter Web
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.27.2'
+          cache: true
+
+      - name: Verify Flutter Installation
+        run: flutter doctor -v
+
+      - name: Create .env File with Backend URL
+        run: |
+          echo "BACKEND_URL=${{ secrets.BACKEND_URL }}" > frontend/.env
+      - name: Install Dependencies
+        run: |
+          cd frontend
+          flutter pub get
+      - name: Build Flutter Web
+        run: |
+          cd frontend
+          flutter build web --release
+      - name: Clone shieldbot-web Repository
+        run: |
+          git clone https://x-access-token:${{ secrets.TOKEN }}@github.com/shashank77665/shieldbot-web.git shieldbot-web
+          rm -rf shieldbot-web/*
+      - name: Copy Build to shieldbot-web
+        run: |
+          cp -r frontend/build/web/* shieldbot-web/
+          cd shieldbot-web
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add .
+          git commit -m "Deploy Flutter Web build"
+          git push origin main
