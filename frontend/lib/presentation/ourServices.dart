@@ -1,0 +1,34 @@
+import 'package:flutter/material.dart';
+import 'package:shieldbot/presentation/components/footer.dart';
+import 'package:shieldbot/presentation/components/header.dart';
+import 'package:shieldbot/presentation/components/styles.dart';
+
+class ourServicesPage extends StatelessWidget {
+  const ourServicesPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final _pageheight = MediaQuery.of(context).size.height;
+    final _pagewidth = MediaQuery.of(context).size.width;
+    return Scaffold(
+      body: Container(
+        padding: EdgeInsets.symmetric(horizontal: _pagewidth * 0.1),
+        decoration: AppStyles.containerDecoration,
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              Header(),
+              Container(
+                height: _pageheight,
+                child: Center(
+                  child: Text('Our Services Page Content'),
+                ),
+              ),
+              Footer()
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
