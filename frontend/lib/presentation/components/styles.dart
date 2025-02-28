@@ -7,6 +7,12 @@ class AppStyles {
     fontWeight: FontWeight.w400,
   );
 
+  static const TextStyle bodyStyle = TextStyle(
+    fontSize: 25,
+    color: Colors.black,
+    fontWeight: FontWeight.w400,
+  );
+
   static const BoxDecoration containerDecoration = BoxDecoration(
     gradient: LinearGradient(
       colors: [

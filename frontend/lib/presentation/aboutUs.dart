@@ -17,7 +17,10 @@ class AboutUsPage extends StatelessWidget {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              Header(),
+              Header(
+                pageheight: _pageheight,
+                pagewidth: _pagewidth,
+              ),
               Container(
                 height: _pageheight,
                 child: Center(
