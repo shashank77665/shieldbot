@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:shieldbot/presentation/components/footer.dart';
 import 'package:shieldbot/presentation/components/header.dart';
 import 'package:shieldbot/presentation/components/styles.dart';
@@ -329,7 +330,9 @@ class _welcomeWidget extends StatelessWidget {
                         style: ButtonStyle(
                             padding:
                                 WidgetStatePropertyAll(EdgeInsets.all(30))),
-                        onPressed: () {},
+                        onPressed: () {
+                          context.go('/dashboard');
+                        },
                         child: Text('Check Now')),
                     SizedBox(
                       width: 60,
