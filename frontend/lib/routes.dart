@@ -1,6 +1,6 @@
 import 'package:go_router/go_router.dart';
 import 'package:shieldbot/presentation/aboutUs.dart';
-import 'package:shieldbot/presentation/components/faq.dart';
+import 'package:shieldbot/presentation/faq.dart';
 import 'package:shieldbot/presentation/landigPage.dart';
 import 'package:shieldbot/presentation/ourServices.dart';
 
