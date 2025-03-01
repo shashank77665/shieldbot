@@ -18,15 +18,15 @@ class Footer extends StatelessWidget {
             children: [
               Text(
                 'We Are Located At ',
-                style: AppStyles.headingStyle,
+                style: AppStyles.subheadingStyle,
               ),
               Text(
                 'Near Kharar Bus Stand, Kharar',
-                style: AppStyles.headingStyle,
+                style: AppStyles.bodyStyle,
               ),
               Text(
                 'SAS Nagar, Punjab (140301)',
-                style: AppStyles.headingStyle,
+                style: AppStyles.bodyStyle,
               )
             ],
           ),
@@ -35,11 +35,11 @@ class Footer extends StatelessWidget {
             children: [
               Text(
                 'Contact Us ',
-                style: AppStyles.headingStyle,
+                style: AppStyles.subheadingStyle,
               ),
               Text(
                 'shashank77665@gmail.com',
-                style: AppStyles.headingStyle,
+                style: AppStyles.bodyStyle,
               )
             ],
           )

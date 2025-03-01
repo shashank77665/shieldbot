@@ -49,8 +49,8 @@ class _DashboardState extends State<Dashboard> {
                         mainAxisSize: MainAxisSize.max,
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          ElevatedButton(
-                              onPressed: () {
+                          GestureDetector(
+                              onTap: () {
                                 showDialog(
                                   context: context,
                                   builder: (context) {
@@ -72,12 +72,9 @@ class _DashboardState extends State<Dashboard> {
                                             children: [
                                               Container(
                                                   height: _pageheight * 0.6,
-                                                  padding: EdgeInsets.symmetric(
-                                                      horizontal: 30),
                                                   child: Column(
                                                     mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .center,
+                                                        MainAxisAlignment.start,
                                                     children: [
                                                       Container(
                                                         width: _pagewidth * 0.3,
@@ -116,7 +113,7 @@ class _DashboardState extends State<Dashboard> {
                                                                         ),
                                                                         color: (_attackType ==
                                                                                 0)
-                                                                            ? Colors.blue
+                                                                            ? AppStyles.secondaryBackground
                                                                             : Colors.white),
                                                                 child: Text(
                                                                   attackName[0],
@@ -151,8 +148,8 @@ class _DashboardState extends State<Dashboard> {
                                                                 decoration: BoxDecoration(
                                                                     color: (_attackType ==
                                                                             1)
-                                                                        ? Colors
-                                                                            .blue
+                                                                        ? AppStyles
+                                                                            .secondaryBackground
                                                                         : Colors
                                                                             .white),
                                                                 child: Text(
@@ -188,8 +185,8 @@ class _DashboardState extends State<Dashboard> {
                                                                 decoration: BoxDecoration(
                                                                     color: (_attackType ==
                                                                             2)
-                                                                        ? Colors
-                                                                            .blue
+                                                                        ? AppStyles
+                                                                            .secondaryBackground
                                                                         : Colors
                                                                             .white),
                                                                 child: Text(
@@ -222,21 +219,17 @@ class _DashboardState extends State<Dashboard> {
                                                                     _pagewidth *
                                                                         0.3 /
                                                                         4,
-                                                                decoration:
-                                                                    BoxDecoration(
-                                                                        borderRadius:
-                                                                            BorderRadius
-                                                                                .only(
-                                                                          topRight:
-                                                                              Radius.circular(10),
-                                                                          // bottomRight: _attackType == 0
-                                                                          //     ? Radius.circular(10)
-                                                                          //     : Radius.circular(0),
-                                                                        ),
-                                                                        color: (_attackType ==
-                                                                                3)
-                                                                            ? Colors.blue
-                                                                            : Colors.white),
+                                                                decoration: BoxDecoration(
+                                                                    // borderRadius:
+                                                                    //     BorderRadius
+                                                                    //         .only(
+                                                                    //   topRight:
+                                                                    //       Radius.circular(10),
+                                                                    //   // bottomRight: _attackType == 0
+                                                                    //   //     ? Radius.circular(10)
+                                                                    //   //     : Radius.circular(0),
+                                                                    // ),
+                                                                    color: (_attackType == 3) ? AppStyles.secondaryBackground : Colors.white),
                                                                 child: Text(
                                                                   attackName[3],
                                                                   textAlign:
@@ -264,13 +257,13 @@ class _DashboardState extends State<Dashboard> {
                                                                   bottomRight: Radius
                                                                       .circular(
                                                                           10)),
-                                                              color:
-                                                                  Colors.blue),
+                                                              color: AppStyles
+                                                                  .secondaryBackground),
                                                           padding:
                                                               EdgeInsets.all(
                                                                   10),
-                                                          height:
-                                                              _pageheight * 0.4,
+                                                          // height:
+                                                          //     _pageheight * 0.4,
                                                           width:
                                                               _pagewidth * 0.3,
                                                           child: _getMenu(
@@ -288,7 +281,8 @@ class _DashboardState extends State<Dashboard> {
                                                             bottomRight:
                                                                 Radius.circular(
                                                                     10)),
-                                                    color: Colors.blue),
+                                                    color: const Color.fromARGB(
+                                                        182, 15, 29, 41)),
                                                 child: Column(
                                                   mainAxisSize:
                                                       MainAxisSize.min,
@@ -300,7 +294,7 @@ class _DashboardState extends State<Dashboard> {
                                                     Text(
                                                       attackName[_attackType],
                                                       style: AppStyles
-                                                          .headingStyle
+                                                          .subheadingStyle
                                                           .copyWith(
                                                               color:
                                                                   Colors.white,
@@ -339,7 +333,11 @@ class _DashboardState extends State<Dashboard> {
                                   },
                                 );
                               },
-                              child: Text('New Attack'))
+                              child: Text(
+                                'New Attack',
+                                style: AppStyles.bodyStyle.copyWith(
+                                    fontSize: 20, color: Colors.black),
+                              ))
                         ],
                       ),
                       Container(
@@ -397,14 +395,16 @@ class _ddosMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _buildContainer(
-      children: [
-        _styledTextField(
-            label: 'Target URL', hint: 'ex: https://www.example.com'),
-        _styledTextField(label: 'Worker Thread Count', hint: 'ex: 1 - 50'),
-        _styledTextField(label: 'Attack Per Thread', hint: 'ex: 100,200'),
-        _styledButton(label: 'Perform DDOS', onPressed: () {}),
-      ],
+    return Container(
+      child: Column(
+        mainAxisSize: MainAxisSize.max,
+        children: [
+          Text(
+            'DDOS menu',
+            style: TextStyle(color: Colors.white),
+          ),
+        ],
+      ),
     );
   }
 }

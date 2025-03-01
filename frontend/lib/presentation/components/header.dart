@@ -32,11 +32,7 @@ class _HeaderState extends State<Header> {
             },
             child: Text(
               'shieldBot',
-              style: TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.w900,
-                color: Colors.black,
-              ),
+              style: AppStyles.subheadingStyle,
             ),
           ),
           Row(
@@ -52,11 +48,8 @@ class _HeaderState extends State<Header> {
                   },
                   child: Text(
                     'Our Services',
-                    style: TextStyle(
-                      fontSize: 25,
-                      fontWeight: FontWeight.w500,
-                      color: const Color.fromARGB(255, 56, 43, 43),
-                    ),
+                    style: AppStyles.subheadingStyle
+                        .copyWith(fontSize: 20, color: Colors.white38),
                   ),
                 ),
               ),
@@ -68,11 +61,8 @@ class _HeaderState extends State<Header> {
                   },
                   child: Text(
                     'FAQ',
-                    style: TextStyle(
-                      fontSize: 25,
-                      fontWeight: FontWeight.w500,
-                      color: const Color.fromARGB(255, 56, 43, 43),
-                    ),
+                    style: AppStyles.subheadingStyle
+                        .copyWith(fontSize: 20, color: Colors.white38),
                   ),
                 ),
               ),
@@ -84,56 +74,41 @@ class _HeaderState extends State<Header> {
                   },
                   child: Text(
                     'About Us',
-                    style: TextStyle(
-                      fontSize: 25,
-                      fontWeight: FontWeight.w500,
-                      color: const Color.fromARGB(255, 56, 43, 43),
-                    ),
+                    style: AppStyles.subheadingStyle
+                        .copyWith(fontSize: 20, color: Colors.white38),
                   ),
                 ),
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 10),
-                child: ElevatedButton(
-                    style: ButtonStyle(
-                        padding: WidgetStatePropertyAll(EdgeInsets.all(15))),
-                    onPressed: () {
-                      showDialog(
-                        context: context,
-                        builder: (context) {
-                          return AlertDialog(
-                            content: _authDialog(
-                              widget: widget,
-                              isNewUser: isNewUser,
-                            ),
-                          );
-                        },
-                      );
-                    },
-                    child: Text(
-                      'Login',
-                      style: TextStyle(
-                        fontSize: 25,
-                        fontWeight: FontWeight.w500,
-                        color: const Color.fromARGB(255, 56, 43, 43),
-                      ),
-                    )),
+                child: GestureDetector(
+                  onTap: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+                          contentPadding: EdgeInsets.zero,
+                          insetPadding: EdgeInsets.zero,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.zero,
+                          ),
+                          elevation: 10,
+                          shadowColor: Colors.black.withOpacity(0.5),
+                          content: _authDialog(
+                            widget: widget,
+                            isNewUser: isNewUser,
+                          ),
+                        );
+                      },
+                    );
+                  },
+                  child: Text(
+                    'Login',
+                    style: AppStyles.subheadingStyle
+                        .copyWith(fontSize: 20, color: Colors.white),
+                  ),
+                ),
               ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10),
-                child: ElevatedButton(
-                    style: ButtonStyle(
-                        padding: WidgetStatePropertyAll(EdgeInsets.all(15))),
-                    onPressed: () {},
-                    child: Text(
-                      'Signup',
-                      style: TextStyle(
-                        fontSize: 25,
-                        fontWeight: FontWeight.w500,
-                        color: const Color.fromARGB(255, 56, 43, 43),
-                      ),
-                    )),
-              )
             ],
           )
         ],
@@ -161,64 +136,90 @@ class _authDialogState extends State<_authDialog> {
   Widget build(BuildContext context) {
     return Container(
         // height: widget.widget.pageheight * 0.6,
-        width: widget.widget.pagewidth * 0.3,
-        padding: EdgeInsets.all(50),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
+        width: widget.widget.pagewidth * 0.6,
+        child: Row(
           children: [
             Container(
-              decoration: BoxDecoration(
-                  color: Colors.white70,
-                  border: Border.all(color: Colors.black),
-                  borderRadius: BorderRadius.circular(10)),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              width: widget.widget.pagewidth * 0.3,
+              height: widget.widget.pageheight * 0.6,
+              decoration:
+                  BoxDecoration(color: Color.fromARGB(255, 234, 229, 254)),
+              child: Image.asset(
+                  '/Volumes/Data/Projects/shieldbot/frontend/assets/images/useronboarding.png'),
+            ),
+            Container(
+              width: widget.widget.pagewidth * 0.3,
+              height: widget.widget.pageheight * 0.6,
+              decoration: BoxDecoration(color: AppStyles.secondaryBackground),
+              child: Column(
                 mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  GestureDetector(
-                    onTap: () {
-                      widget.isNewUser = false;
-                      setState(() {});
-                    },
-                    child: Container(
-                      padding: EdgeInsets.all(15),
-                      width: widget.widget.pagewidth * 0.09,
-                      decoration: BoxDecoration(
-                          color:
-                              widget.isNewUser ? Colors.white70 : Colors.blue,
-                          borderRadius: BorderRadius.circular(10)),
-                      child: Text(
-                        'Login ',
-                        textAlign: TextAlign.center,
-                        style: AppStyles.headingStyle,
-                      ),
+                  Container(
+                    decoration: BoxDecoration(
+                        color: AppStyles.info,
+                        border: Border.all(color: Colors.black),
+                        borderRadius: BorderRadius.circular(10)),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            widget.isNewUser = false;
+                            setState(() {});
+                          },
+                          child: Container(
+                            padding: EdgeInsets.all(15),
+                            width: widget.widget.pagewidth * 0.09,
+                            decoration: BoxDecoration(
+                                color: widget.isNewUser
+                                    ? AppStyles.info
+                                    : Colors.white,
+                                borderRadius: BorderRadius.circular(10)),
+                            child: Text(
+                              'Login ',
+                              textAlign: TextAlign.center,
+                              style: AppStyles.bodyStyle.copyWith(
+                                  color: widget.isNewUser
+                                      ? Colors.white
+                                      : Colors.black),
+                            ),
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            widget.isNewUser = true;
+                            setState(() {});
+                          },
+                          child: Container(
+                            padding: EdgeInsets.all(15),
+                            width: widget.widget.pagewidth * 0.09,
+                            decoration: BoxDecoration(
+                                color: widget.isNewUser
+                                    ? Colors.white
+                                    : AppStyles.info,
+                                borderRadius: BorderRadius.circular(10)),
+                            child: Text(
+                              'Signup ',
+                              textAlign: TextAlign.center,
+                              style: AppStyles.bodyStyle.copyWith(
+                                  color: widget.isNewUser
+                                      ? Colors.black
+                                      : Colors.white),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  GestureDetector(
-                    onTap: () {
-                      widget.isNewUser = true;
-                      setState(() {});
-                    },
-                    child: Container(
-                      padding: EdgeInsets.all(15),
-                      width: widget.widget.pagewidth * 0.09,
-                      decoration: BoxDecoration(
-                          color:
-                              widget.isNewUser ? Colors.blue : Colors.white10,
-                          borderRadius: BorderRadius.circular(10)),
-                      child: Text(
-                        'Signup ',
-                        textAlign: TextAlign.center,
-                        style: AppStyles.headingStyle,
-                      ),
-                    ),
-                  ),
+                  widget.isNewUser
+                      ? _signupWidget(widget: widget.widget)
+                      : _loginWidget(widget: widget.widget)
                 ],
               ),
             ),
-            widget.isNewUser
-                ? _signupWidget(widget: widget.widget)
-                : _loginWidget(widget: widget.widget)
           ],
         ));
   }
@@ -243,9 +244,24 @@ class _loginWidget extends StatelessWidget {
           width: widget.pagewidth * 0.18,
           child: TextField(
             decoration: InputDecoration(
-                border: OutlineInputBorder(),
-                hintText: 'Username',
-                label: Text('Username')),
+              hintText: 'Username',
+              labelText: 'Username',
+              labelStyle: TextStyle(color: Colors.white),
+              hintStyle: TextStyle(color: Colors.grey.shade500),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: Colors.grey.shade300),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: Colors.grey.shade300),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: Colors.white, width: 2),
+              ),
+            ),
+            style: TextStyle(color: Colors.white),
           ),
         ),
         SizedBox(
@@ -255,27 +271,59 @@ class _loginWidget extends StatelessWidget {
           width: widget.pagewidth * 0.18,
           child: TextField(
             decoration: InputDecoration(
-                border: OutlineInputBorder(),
-                hintText: 'Password',
-                label: Text('Password')),
+              hintText: 'Password',
+              labelText: 'Password',
+              labelStyle: TextStyle(color: Colors.white),
+              hintStyle: TextStyle(color: Colors.grey.shade500),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: Colors.grey.shade300),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: Colors.grey.shade300),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: Colors.white, width: 2),
+              ),
+            ),
+            style: TextStyle(color: Colors.white),
           ),
         ),
         SizedBox(
           height: 20,
         ),
         ElevatedButton(
-            onPressed: () {},
-            style: ButtonStyle(
-                minimumSize:
-                    WidgetStatePropertyAll(Size(widget.pagewidth * 0.18, 60))),
-            child: Text('Login')),
+          style: ButtonStyle(
+            padding: WidgetStatePropertyAll(EdgeInsets.all(20)),
+            backgroundColor: WidgetStatePropertyAll(Colors.white),
+            elevation: WidgetStatePropertyAll(10),
+            shape: WidgetStatePropertyAll(
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+          ),
+          onPressed: () {},
+          child: Text('Login',
+              style: AppStyles.bodyStyle.copyWith(color: Colors.black)),
+        ),
         SizedBox(
-          height: 20,
+          height: 15,
         ),
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [Text('Forgot Password'), Text('New User')],
-        )
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            Spacer(),
+            Text(
+              'Forgot Password',
+              style: TextStyle(
+                color: const Color.fromARGB(91, 241, 174, 5),
+              ),
+              textAlign: TextAlign.start,
+            ),
+            Spacer()
+          ],
+        ),
       ],
     );
   }
@@ -300,9 +348,24 @@ class _signupWidget extends StatelessWidget {
           width: widget.pagewidth * 0.18,
           child: TextField(
             decoration: InputDecoration(
-                border: OutlineInputBorder(),
-                hintText: 'Username',
-                label: Text('Username')),
+              hintText: 'Username',
+              labelText: 'Username',
+              labelStyle: TextStyle(color: Colors.white),
+              hintStyle: TextStyle(color: Colors.grey.shade500),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: Colors.grey.shade300),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: Colors.grey.shade300),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: Colors.white, width: 2),
+              ),
+            ),
+            style: TextStyle(color: Colors.white),
           ),
         ),
         SizedBox(
@@ -312,9 +375,24 @@ class _signupWidget extends StatelessWidget {
           width: widget.pagewidth * 0.18,
           child: TextField(
             decoration: InputDecoration(
-                border: OutlineInputBorder(),
-                hintText: 'Password',
-                label: Text('Password')),
+              hintText: 'Password',
+              labelText: 'Password',
+              labelStyle: TextStyle(color: Colors.white),
+              hintStyle: TextStyle(color: Colors.grey.shade500),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: Colors.grey.shade300),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: Colors.grey.shade300),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: Colors.white, width: 2),
+              ),
+            ),
+            style: TextStyle(color: Colors.white),
           ),
         ),
         SizedBox(
@@ -324,27 +402,59 @@ class _signupWidget extends StatelessWidget {
           width: widget.pagewidth * 0.18,
           child: TextField(
             decoration: InputDecoration(
-                border: OutlineInputBorder(),
-                hintText: 'Confirm Password',
-                label: Text('Confirm Password')),
+              hintText: 'Confirm Password',
+              labelText: 'Confirm Password',
+              labelStyle: TextStyle(color: Colors.white),
+              hintStyle: TextStyle(color: Colors.grey.shade500),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: Colors.grey.shade300),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: Colors.grey.shade300),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: Colors.white, width: 2),
+              ),
+            ),
+            style: TextStyle(color: Colors.white),
           ),
         ),
         SizedBox(
           height: 20,
         ),
         ElevatedButton(
-            onPressed: () {},
-            style: ButtonStyle(
-                minimumSize:
-                    WidgetStatePropertyAll(Size(widget.pagewidth * 0.18, 60))),
-            child: Text('Signup')),
-        SizedBox(
-          height: 10,
+          style: ButtonStyle(
+            padding: WidgetStatePropertyAll(EdgeInsets.all(20)),
+            backgroundColor: WidgetStatePropertyAll(Colors.white),
+            elevation: WidgetStatePropertyAll(10),
+            shape: WidgetStatePropertyAll(
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+          ),
+          onPressed: () {},
+          child: Text('Signup',
+              style: AppStyles.bodyStyle.copyWith(color: Colors.black)),
         ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [Text('Existing User')],
-        )
+        SizedBox(
+          height: 15,
+        ),
+        // Row(
+        //   mainAxisAlignment: MainAxisAlignment.start,
+        //   children: [
+        //     Spacer(),
+        //     Text(
+        //       'Forgot Password',
+        //       style: TextStyle(
+        //         color: const Color.fromARGB(91, 241, 174, 5),
+        //       ),
+        //       textAlign: TextAlign.start,
+        //     ),
+        //     Spacer()
+        //   ],
+        // ),
       ],
     );
   }
