@@ -64,7 +64,7 @@ class _locationWidget extends StatelessWidget {
             children: [
               Text(
                 'Expert Support',
-                style: AppStyles.headingStyle
+                style: AppStyles.subheadingStyle
                     .copyWith(fontWeight: FontWeight.bold),
               ),
               SizedBox(
@@ -82,7 +82,7 @@ class _locationWidget extends StatelessWidget {
               ),
               Text(
                 'Visit us !',
-                style: AppStyles.headingStyle
+                style: AppStyles.subheadingStyle
                     .copyWith(fontWeight: FontWeight.bold),
               ),
               SizedBox(
@@ -90,7 +90,7 @@ class _locationWidget extends StatelessWidget {
               ),
               Text(
                 'Our locations',
-                style: AppStyles.headingStyle
+                style: AppStyles.subheadingStyle
                     .copyWith(fontWeight: FontWeight.bold),
               ),
               SizedBox(
@@ -106,10 +106,10 @@ class _locationWidget extends StatelessWidget {
             ],
           ),
           Container(
-            height: _pageheight * 0.7,
-            width: _pagewidth * 0.4,
+            height: _pageheight * 0.5,
+            width: _pagewidth * 0.3,
             decoration: BoxDecoration(
-                color: Colors.white,
+                color: const Color.fromARGB(102, 171, 153, 153),
                 borderRadius: BorderRadius.only(
                   topRight: Radius.circular(40),
                 )),
@@ -127,7 +127,6 @@ class _locationWidget extends StatelessWidget {
 
 class _ourservicesWidget extends StatelessWidget {
   const _ourservicesWidget({
-    super.key,
     required double pageheight,
     required double pagewidth,
   })  : _pageheight = pageheight,
@@ -139,13 +138,14 @@ class _ourservicesWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: _pageheight,
+      height: _pageheight * 0.8,
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Text(
             'Our Services',
-            style: AppStyles.headingStyle.copyWith(fontSize: 40),
+            style: AppStyles.headingStyle,
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -156,13 +156,19 @@ class _ourservicesWidget extends StatelessWidget {
             ],
           ),
           ElevatedButton(
-              onPressed: () {},
-              style: ButtonStyle(
-                  padding: WidgetStatePropertyAll(EdgeInsets.all(20))),
-              child: Text(
-                'See All',
-                style: AppStyles.headingStyle,
-              ))
+            style: ButtonStyle(
+              padding: WidgetStatePropertyAll(EdgeInsets.all(30)),
+              backgroundColor: WidgetStatePropertyAll(
+                  const Color.fromARGB(116, 173, 157, 157)),
+              elevation: WidgetStatePropertyAll(10),
+              shape: WidgetStatePropertyAll(
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              ),
+            ),
+            onPressed: () {},
+            child: Text('See All',
+                style: AppStyles.bodyStyle.copyWith(fontSize: 30)),
+          ),
         ],
       ),
     );
@@ -171,7 +177,6 @@ class _ourservicesWidget extends StatelessWidget {
 
 class _productCard extends StatelessWidget {
   const _productCard({
-    super.key,
     required double pageheight,
     required double pagewidth,
   })  : _pageheight = pageheight,
@@ -187,7 +192,7 @@ class _productCard extends StatelessWidget {
       height: _pageheight * 0.45,
       width: _pagewidth * 0.2,
       decoration: BoxDecoration(
-          color: Colors.white,
+          color: const Color.fromARGB(255, 86, 107, 126),
           borderRadius: BorderRadius.only(
               topRight: Radius.circular(40), bottomLeft: Radius.circular(40))),
       child: Column(
@@ -210,7 +215,7 @@ class _productCard extends StatelessWidget {
           ),
           Text(
             'All about DDOS Prevention system . It is body that describe DDOS prevention system.',
-            style: AppStyles.bodyStyle.copyWith(fontSize: 15),
+            style: AppStyles.bodyStyle,
           )
         ],
       ),
@@ -220,7 +225,6 @@ class _productCard extends StatelessWidget {
 
 class _questionWidget extends StatelessWidget {
   const _questionWidget({
-    super.key,
     required double pageheight,
     required double pagewidth,
   })  : _pageheight = pageheight,
@@ -232,16 +236,24 @@ class _questionWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: _pageheight,
+      height: _pageheight * 0.7,
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
+          Center(
+            child: Icon(
+              Icons.question_mark,
+              color: Colors.red,
+              size: 400,
+            ),
+          ),
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 'What we do?',
-                style: AppStyles.headingStyle.copyWith(fontSize: 35),
+                style: AppStyles.subheadingStyle,
               ),
               SizedBox(
                 height: 50,
@@ -255,13 +267,6 @@ class _questionWidget extends StatelessWidget {
               )
             ],
           ),
-          Center(
-            child: Icon(
-              Icons.question_mark,
-              color: Colors.red,
-              size: 500,
-            ),
-          )
         ],
       ),
     );
@@ -281,7 +286,7 @@ class _welcomeWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: _pageheight,
+      height: _pageheight * 0.8,
       width: double.infinity,
       child: Container(
         child: Row(
@@ -307,9 +312,10 @@ class _welcomeWidget extends StatelessWidget {
                     Text(
                       'Test Security',
                       style: TextStyle(
-                        fontSize: 60,
-                        fontWeight: FontWeight.w500,
-                        color: const Color.fromARGB(255, 132, 103, 101),
+                        fontSize: 68,
+                        fontFamily: 'Nohemi',
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
                       ),
                     ),
                     Text(
@@ -327,22 +333,40 @@ class _welcomeWidget extends StatelessWidget {
                   mainAxisSize: MainAxisSize.max,
                   children: [
                     ElevatedButton(
-                        style: ButtonStyle(
-                            padding:
-                                WidgetStatePropertyAll(EdgeInsets.all(30))),
-                        onPressed: () {
-                          context.go('/dashboard');
-                        },
-                        child: Text('Check Now')),
+                      style: ButtonStyle(
+                        padding: WidgetStatePropertyAll(EdgeInsets.all(30)),
+                        backgroundColor: WidgetStatePropertyAll(
+                            const Color.fromARGB(116, 108, 97, 97)),
+                        elevation: WidgetStatePropertyAll(10),
+                        shape: WidgetStatePropertyAll(
+                          RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10)),
+                        ),
+                      ),
+                      onPressed: () {
+                        context.go('/dashboard');
+                      },
+                      child: Text('Check Now', style: AppStyles.bodyStyle),
+                    ),
                     SizedBox(
                       width: 60,
                     ),
                     ElevatedButton(
-                        style: ButtonStyle(
-                            padding:
-                                WidgetStatePropertyAll(EdgeInsets.all(30))),
-                        onPressed: () {},
-                        child: Text('Browse Features'))
+                      style: ButtonStyle(
+                        padding: WidgetStatePropertyAll(EdgeInsets.all(30)),
+                        backgroundColor: WidgetStatePropertyAll(
+                            const Color.fromARGB(116, 108, 97, 97)),
+                        elevation: WidgetStatePropertyAll(10),
+                        shape: WidgetStatePropertyAll(
+                          RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10)),
+                        ),
+                      ),
+                      onPressed: () {},
+                      child: Text('Browse Features',
+                          style: AppStyles.bodyStyle
+                              .copyWith(color: Colors.white54)),
+                    ),
                   ],
                 )
               ],
