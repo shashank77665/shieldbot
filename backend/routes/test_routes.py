@@ -46,7 +46,21 @@ def run_cyber_test(app, test_id, base_url, options, user_id):
     and then call execute_test with the expected 4 arguments.
     """
     with app.app_context():
-        execute_test(test_id, base_url, options, user_id)
+        # Get the test to update its status
+        test = Test.query.get(test_id)
+        if test:
+            test.status = "Running"
+            db.session.commit()
+            
+        results = execute_test(test_id, base_url, options, user_id)
+        
+        # Update test with results
+        test = Test.query.get(test_id)
+        if test:
+            test.status = "Completed"
+            test.end_time = datetime.now(UTC)
+            test.logs = results
+            db.session.commit()
 
 @test_bp.route("/create", methods=["POST"])
 def create_test():
@@ -61,17 +75,22 @@ def create_test():
 
     data = request.json
     base_url = data.get("base_url")
-    test_name = data.get("test_name", "Cyber Test")
     test_options = data.get("options", {})
+    
     if not base_url:
         return jsonify({"error": "Base URL is required"}), 400
 
-    new_test = Test(
-         user_id=user.id,
-         test_name=test_name,
-         base_url=base_url,
-         status="Pending"
-    )
+    # Create a test with minimal attributes first to diagnose issue
+    new_test = Test()
+    new_test.user_id = user.id
+    new_test.base_url = base_url
+    new_test.test_type = data.get("test_type", "comprehensive")
+    new_test.status = "Pending"
+    
+    # Add these after the object is created
+    if "test_name" in data:
+        new_test.test_name = data.get("test_name")
+    
     db.session.add(new_test)
     db.session.commit()
     
@@ -84,9 +103,9 @@ def create_test():
     thread.start()
     
     return jsonify({
-         "message": "Test initiated",
-         "test_id": new_test.id,
-         "redirect_url": f"/test/status/{new_test.id}"
+        "message": "Test initiated",
+        "test_id": new_test.id,
+        "redirect_url": f"/test/status/{new_test.id}"
     }), 202
 
 @test_bp.route("/status/<int:test_id>", methods=["GET"])

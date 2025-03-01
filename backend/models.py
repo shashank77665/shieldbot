@@ -2,13 +2,15 @@ from backend.database import db
 from datetime import timezone, datetime, timedelta
 import time
 from celery.result import AsyncResult
+from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.ext.mutable import MutableDict
 
 class ShieldbotUser(db.Model):
     __tablename__ = "shieldbot_users"
     
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(80), unique=True, nullable=False)
-    email = db.Column(db.String(120), unique=True, nullable=False)
+    username = db.Column(db.String(50), unique=True, nullable=False)
+    email = db.Column(db.String(100), unique=True, nullable=False)
     password_hash = db.Column(db.String(128), nullable=False)
     is_superuser = db.Column(db.Boolean, default=False)
     profile_picture = db.Column(db.String(256), default="user.jpg")
@@ -23,8 +25,8 @@ class ShieldbotUser(db.Model):
     @staticmethod
     def validate_fields(data):
         """Validate and truncate fields to conform to database constraints."""
-        data["username"] = data.get("username", "")[:80]
-        data["email"] = data.get("email", "")[:120]
+        data["username"] = data.get("username", "")[:50]
+        data["email"] = data.get("email", "")[:100]
         return data
 
     @property
@@ -40,15 +42,20 @@ class Test(db.Model):
     
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("shieldbot_users.id"), nullable=False)
-    test_name = db.Column(db.String(100), nullable=False)
-    base_url = db.Column(db.Text, nullable=False)
-    status = db.Column(db.String(50), nullable=False, default="Pending")
-    logs = db.Column(db.JSON, nullable=True)
-    ai_insights = db.Column(db.JSON, nullable=True)
+    task_id = db.Column(db.String(50), nullable=True)
+    base_url = db.Column(db.String(255), nullable=False)
+    test_type = db.Column(db.String(50), nullable=False, default="comprehensive")
+    test_name = db.Column(db.String(100), nullable=True)
+    status = db.Column(db.String(20), default='Pending')
     start_time = db.Column(db.DateTime, default=datetime.utcnow)
     end_time = db.Column(db.DateTime, nullable=True)
+    logs = db.Column(MutableDict.as_mutable(JSONB), default={})
+    ai_insights = db.Column(MutableDict.as_mutable(JSONB), nullable=True)
     celery_task_id = db.Column(db.String(128), nullable=True)
     last_updated = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    def __repr__(self):
+        return f'<Test {self.id} {self.test_type} {self.status}>'
 
 class RequestLog(db.Model):
     id = db.Column(db.Integer, primary_key=True)
