@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shieldbot/functions/auth/auth.dart';
 import 'package:shieldbot/presentation/components/footer.dart';
 import 'package:shieldbot/presentation/components/header.dart';
 import 'package:shieldbot/presentation/components/styles.dart';
@@ -273,7 +275,7 @@ class _questionWidget extends StatelessWidget {
   }
 }
 
-class _welcomeWidget extends StatelessWidget {
+class _welcomeWidget extends StatefulWidget {
   const _welcomeWidget({
     required double pageheight,
     required double pagewidth,
@@ -284,9 +286,49 @@ class _welcomeWidget extends StatelessWidget {
   final double _pagewidth;
 
   @override
+  State<_welcomeWidget> createState() => _welcomeWidgetState();
+}
+
+class _welcomeWidgetState extends State<_welcomeWidget> {
+  bool _isloggedIn = false;
+
+  late String? _user_name;
+  late String? _user_email;
+
+  Future<void> isLoggedIn() async {
+    final prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString("auth_token");
+
+    print('checking is logged in ');
+    print(token);
+
+    if (token == null) {
+      print("User not Logged in ");
+      _isloggedIn = false;
+      setState(() {});
+      return;
+    }
+
+    _isloggedIn = await isTokenValid(token);
+    if (_isloggedIn) {
+      _user_name = prefs.getString("username");
+      _user_email = prefs.getString("user_email");
+    }
+    print(_isloggedIn);
+    setState(() {});
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    isLoggedIn();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Container(
-      height: _pageheight * 0.8,
+      height: widget._pageheight * 0.8,
       width: double.infinity,
       child: Container(
         child: Row(
@@ -298,7 +340,9 @@ class _welcomeWidget extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'shieldBot',
+                  _isloggedIn
+                      ? "Hello  ${_user_name ?? "Username"} !"
+                      : 'shieldBot',
                   style: TextStyle(
                     fontSize: 48,
                     fontWeight: FontWeight.w900,
@@ -332,48 +376,49 @@ class _welcomeWidget extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   mainAxisSize: MainAxisSize.max,
                   children: [
-                    ElevatedButton(
-                      style: ButtonStyle(
-                        padding: WidgetStatePropertyAll(EdgeInsets.all(30)),
-                        backgroundColor: WidgetStatePropertyAll(
-                            const Color.fromARGB(116, 108, 97, 97)),
-                        elevation: WidgetStatePropertyAll(10),
-                        shape: WidgetStatePropertyAll(
-                          RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10)),
-                        ),
-                      ),
-                      onPressed: () {
-                        context.go('/dashboard');
-                      },
-                      child: Text('Check Now', style: AppStyles.bodyStyle),
-                    ),
-                    SizedBox(
-                      width: 60,
-                    ),
-                    ElevatedButton(
-                      style: ButtonStyle(
-                        padding: WidgetStatePropertyAll(EdgeInsets.all(30)),
-                        backgroundColor: WidgetStatePropertyAll(
-                            const Color.fromARGB(116, 108, 97, 97)),
-                        elevation: WidgetStatePropertyAll(10),
-                        shape: WidgetStatePropertyAll(
-                          RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10)),
-                        ),
-                      ),
-                      onPressed: () {},
-                      child: Text('Browse Features',
-                          style: AppStyles.bodyStyle
-                              .copyWith(color: Colors.white54)),
-                    ),
+                    _isloggedIn
+                        ? ElevatedButton(
+                            style: ButtonStyle(
+                              padding:
+                                  WidgetStatePropertyAll(EdgeInsets.all(30)),
+                              backgroundColor: WidgetStatePropertyAll(
+                                  const Color.fromARGB(116, 108, 97, 97)),
+                              elevation: WidgetStatePropertyAll(10),
+                              shape: WidgetStatePropertyAll(
+                                RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10)),
+                              ),
+                            ),
+                            onPressed: () {
+                              context.go('/dashboard');
+                            },
+                            child: Text('Go to Dashboard',
+                                style: AppStyles.bodyStyle),
+                          )
+                        : ElevatedButton(
+                            style: ButtonStyle(
+                              padding:
+                                  WidgetStatePropertyAll(EdgeInsets.all(30)),
+                              backgroundColor: WidgetStatePropertyAll(
+                                  const Color.fromARGB(116, 108, 97, 97)),
+                              elevation: WidgetStatePropertyAll(10),
+                              shape: WidgetStatePropertyAll(
+                                RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10)),
+                              ),
+                            ),
+                            onPressed: () {},
+                            child: Text('Browse Features',
+                                style: AppStyles.bodyStyle
+                                    .copyWith(color: Colors.white54)),
+                          ),
                   ],
                 )
               ],
             ),
             Image.asset(
               "/Volumes/Data/Projects/shieldbot/frontend/assets/images/safety.png",
-              width: _pagewidth * 0.3,
+              width: widget._pagewidth * 0.3,
             )
           ],
         ),
