@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shieldbot/functions/auth/auth.dart';
 import 'package:shieldbot/presentation/components/styles.dart';
 
 class Header extends StatefulWidget {
@@ -17,6 +19,31 @@ class Header extends StatefulWidget {
 
 class _HeaderState extends State<Header> {
   bool isNewUser = false;
+  bool _isloggedIn = false;
+
+  Future<void> isLoggedIn() async {
+    final prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString("auth_token");
+
+    if (token != null) {
+      print('token found $token');
+      _isloggedIn = true;
+      setState(() {});
+      isTokenValid(token);
+    } else {
+      print("No token found");
+      _isloggedIn = false;
+      setState(() {});
+    }
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    print('Checking Header init');
+    isLoggedIn();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -81,33 +108,44 @@ class _HeaderState extends State<Header> {
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 10),
-                child: GestureDetector(
-                  onTap: () {
-                    showDialog(
-                      context: context,
-                      builder: (context) {
-                        return AlertDialog(
-                          contentPadding: EdgeInsets.zero,
-                          insetPadding: EdgeInsets.zero,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.zero,
-                          ),
-                          elevation: 10,
-                          shadowColor: Colors.black.withOpacity(0.5),
-                          content: _authDialog(
-                            widget: widget,
-                            isNewUser: isNewUser,
-                          ),
-                        );
-                      },
-                    );
-                  },
-                  child: Text(
-                    'Login',
-                    style: AppStyles.subheadingStyle
-                        .copyWith(fontSize: 20, color: Colors.white),
-                  ),
-                ),
+                child: _isloggedIn
+                    ? GestureDetector(
+                        onTap: () {
+                          context.go('/dashboard');
+                        },
+                        child: Text(
+                          'DashBoard',
+                          style: AppStyles.subheadingStyle
+                              .copyWith(fontSize: 20, color: Colors.white),
+                        ),
+                      )
+                    : GestureDetector(
+                        onTap: () {
+                          showDialog(
+                            context: context,
+                            builder: (context) {
+                              return AlertDialog(
+                                contentPadding: EdgeInsets.zero,
+                                insetPadding: EdgeInsets.zero,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.zero,
+                                ),
+                                elevation: 10,
+                                shadowColor: Colors.black.withOpacity(0.5),
+                                content: _authDialog(
+                                  widget: widget,
+                                  isNewUser: isNewUser,
+                                ),
+                              );
+                            },
+                          );
+                        },
+                        child: Text(
+                          'Login',
+                          style: AppStyles.subheadingStyle
+                              .copyWith(fontSize: 20, color: Colors.white),
+                        ),
+                      ),
               ),
             ],
           )
@@ -132,6 +170,8 @@ class _authDialog extends StatefulWidget {
 }
 
 class _authDialogState extends State<_authDialog> {
+  bool isObscuredSignConfirmPass = true;
+  bool isObscuredSignupConfirmPass = true;
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -225,7 +265,7 @@ class _authDialogState extends State<_authDialog> {
   }
 }
 
-class _loginWidget extends StatelessWidget {
+class _loginWidget extends StatefulWidget {
   const _loginWidget({
     super.key,
     required this.widget,
@@ -234,6 +274,15 @@ class _loginWidget extends StatelessWidget {
   final Header widget;
 
   @override
+  State<_loginWidget> createState() => _loginWidgetState();
+}
+
+class _loginWidgetState extends State<_loginWidget> {
+  bool _isObscuredLoginPass = true;
+
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  @override
   Widget build(BuildContext context) {
     return Column(
       children: [
@@ -241,8 +290,9 @@ class _loginWidget extends StatelessWidget {
           height: 20,
         ),
         SizedBox(
-          width: widget.pagewidth * 0.18,
+          width: widget.widget.pagewidth * 0.18,
           child: TextField(
+            controller: _emailController,
             decoration: InputDecoration(
               hintText: 'Username',
               labelText: 'Username',
@@ -268,9 +318,22 @@ class _loginWidget extends StatelessWidget {
           height: 20,
         ),
         SizedBox(
-          width: widget.pagewidth * 0.18,
+          width: widget.widget.pagewidth * 0.18,
           child: TextField(
+            controller: _passwordController,
+            obscureText: _isObscuredLoginPass,
             decoration: InputDecoration(
+              suffixIcon: IconButton(
+                  onPressed: () {
+                    _isObscuredLoginPass = !_isObscuredLoginPass;
+                    setState(() {});
+                  },
+                  icon: Icon(
+                    _isObscuredLoginPass
+                        ? Icons.visibility_off
+                        : Icons.visibility,
+                    color: Colors.white60,
+                  )),
               hintText: 'Password',
               labelText: 'Password',
               labelStyle: TextStyle(color: Colors.white),
@@ -303,7 +366,9 @@ class _loginWidget extends StatelessWidget {
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
           ),
-          onPressed: () {},
+          onPressed: () {
+            logIn(_emailController.text, _passwordController.text);
+          },
           child: Text('Login',
               style: AppStyles.bodyStyle.copyWith(color: Colors.black)),
         ),
@@ -329,13 +394,24 @@ class _loginWidget extends StatelessWidget {
   }
 }
 
-class _signupWidget extends StatelessWidget {
+class _signupWidget extends StatefulWidget {
   const _signupWidget({
     super.key,
     required this.widget,
   });
 
   final Header widget;
+
+  @override
+  State<_signupWidget> createState() => _signupWidgetState();
+}
+
+class _signupWidgetState extends State<_signupWidget> {
+  bool _isObscuredSignupPass = true;
+  bool _isObscuredSignupConfirmPass = true;
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -345,8 +421,9 @@ class _signupWidget extends StatelessWidget {
           height: 20,
         ),
         SizedBox(
-          width: widget.pagewidth * 0.18,
+          width: widget.widget.pagewidth * 0.18,
           child: TextField(
+            controller: _usernameController,
             decoration: InputDecoration(
               hintText: 'Username',
               labelText: 'Username',
@@ -372,9 +449,50 @@ class _signupWidget extends StatelessWidget {
           height: 20,
         ),
         SizedBox(
-          width: widget.pagewidth * 0.18,
+          width: widget.widget.pagewidth * 0.18,
           child: TextField(
+            controller: _emailController,
             decoration: InputDecoration(
+              hintText: 'Email',
+              labelText: 'Email',
+              labelStyle: TextStyle(color: Colors.white),
+              hintStyle: TextStyle(color: Colors.grey.shade500),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: Colors.grey.shade300),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: Colors.grey.shade300),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: Colors.white, width: 2),
+              ),
+            ),
+            style: TextStyle(color: Colors.white),
+          ),
+        ),
+        SizedBox(
+          height: 20,
+        ),
+        SizedBox(
+          width: widget.widget.pagewidth * 0.18,
+          child: TextField(
+            controller: _passwordController,
+            obscureText: _isObscuredSignupPass,
+            decoration: InputDecoration(
+              suffixIcon: IconButton(
+                  onPressed: () {
+                    _isObscuredSignupPass = !_isObscuredSignupPass;
+                    setState(() {});
+                  },
+                  icon: Icon(
+                    _isObscuredSignupPass
+                        ? Icons.visibility_off
+                        : Icons.visibility,
+                    color: Colors.white60,
+                  )),
               hintText: 'Password',
               labelText: 'Password',
               labelStyle: TextStyle(color: Colors.white),
@@ -399,9 +517,22 @@ class _signupWidget extends StatelessWidget {
           height: 20,
         ),
         SizedBox(
-          width: widget.pagewidth * 0.18,
+          width: widget.widget.pagewidth * 0.18,
           child: TextField(
+            obscureText: _isObscuredSignupConfirmPass,
             decoration: InputDecoration(
+              suffixIcon: IconButton(
+                  onPressed: () {
+                    _isObscuredSignupConfirmPass =
+                        !_isObscuredSignupConfirmPass;
+                    setState(() {});
+                  },
+                  icon: Icon(
+                    _isObscuredSignupConfirmPass
+                        ? Icons.visibility_off
+                        : Icons.visibility,
+                    color: Colors.white60,
+                  )),
               hintText: 'Confirm Password',
               labelText: 'Confirm Password',
               labelStyle: TextStyle(color: Colors.white),
@@ -434,7 +565,10 @@ class _signupWidget extends StatelessWidget {
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
           ),
-          onPressed: () {},
+          onPressed: () {
+            signUpUser(_usernameController.text, _emailController.text,
+                _passwordController.text);
+          },
           child: Text('Signup',
               style: AppStyles.bodyStyle.copyWith(color: Colors.black)),
         ),
