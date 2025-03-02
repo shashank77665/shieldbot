@@ -1,0 +1,399 @@
+{
+  "info": {
+    "name": "DDOS App Postman Collection",
+    "_postman_id": "e25a0cbb-cd52-4bd0-83e7-a6f5ff3f6d1f",
+    "description": "Collection to test all routes for the DDOS app including auth routes, attack routes, and agent routes.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Auth Routes",
+      "item": [
+        {
+          "name": "Signup",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"testuser\",\n  \"email\": \"test@example.com\",\n  \"password\": \"secret\"\n}"
+            },
+            "url": {
+              "raw": "{{centralUrl}}/auth/signup",
+              "host": [
+                "{{centralUrl}}"
+              ],
+              "path": [
+                "auth",
+                "signup"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"secret\"\n}"
+            },
+            "url": {
+              "raw": "{{centralUrl}}/auth/login",
+              "host": [
+                "{{centralUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Verify Token",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{centralUrl}}/auth/verify-token",
+              "host": [
+                "{{centralUrl}}"
+              ],
+              "path": [
+                "auth",
+                "verify-token"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{centralUrl}}/auth/refresh-token",
+              "host": [
+                "{{centralUrl}}"
+              ],
+              "path": [
+                "auth",
+                "refresh-token"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "DDOS Attack (Auth Route)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mode\": \"execute\",\n  \"target_url\": \"http://example.com\",\n  \"workers\": 5,\n  \"processes_per_worker\": 10,\n  \"selected_agents\": [\"{{agentUrl}}\"]\n}"
+            },
+            "url": {
+              "raw": "{{centralUrl}}/auth/ddos",
+              "host": [
+                "{{centralUrl}}"
+              ],
+              "path": [
+                "auth",
+                "ddos"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Attack Routes",
+      "item": [
+        {
+          "name": "Perform Test",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"base_url\": \"http://example.com\",\n  \"attack_selection\": {}\n}"
+            },
+            "url": {
+              "raw": "{{centralUrl}}/attack/perform-test",
+              "host": [
+                "{{centralUrl}}"
+              ],
+              "path": [
+                "attack",
+                "perform-test"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Stop DDOS",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"agents\": [\"{{agentUrl}}\"]\n}"
+            },
+            "url": {
+              "raw": "{{centralUrl}}/attack/stop-ddos",
+              "host": [
+                "{{centralUrl}}"
+              ],
+              "path": [
+                "attack",
+                "stop-ddos"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Stop All DDOS",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{centralUrl}}/attack/stop-all-ddos",
+              "host": [
+                "{{centralUrl}}"
+              ],
+              "path": [
+                "attack",
+                "stop-all-ddos"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Command",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{centralUrl}}/attack/get_command",
+              "host": [
+                "{{centralUrl}}"
+              ],
+              "path": [
+                "attack",
+                "get_command"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Execute Attack",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"command\": \"ddos_attack\",\n  \"params\": {\n      \"base_url\": \"http://example.com\",\n      \"workers\": 5,\n      \"processes_per_worker\": 10,\n      \"agents\": [\"{{agentUrl}}\"]\n  }\n}"
+            },
+            "url": {
+              "raw": "{{centralUrl}}/attack/execute",
+              "host": [
+                "{{centralUrl}}"
+              ],
+              "path": [
+                "attack",
+                "execute"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Agent Routes",
+      "item": [
+        {
+          "name": "Confirm",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{agentUrl}}/confirm",
+              "host": [
+                "{{agentUrl}}"
+              ],
+              "path": [
+                "confirm"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Send Command",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-SECRET-KEY",
+                "value": "secret"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"execute\": true,\n  \"args\": [\"http://example.com\", 5, 10]\n}"
+            },
+            "url": {
+              "raw": "{{agentUrl}}/command",
+              "host": [
+                "{{agentUrl}}"
+              ],
+              "path": [
+                "command"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Execute (Agent)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-SECRET-KEY",
+                "value": "secret"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"command\": \"ddos_attack\",\n  \"params\": {\n      \"base_url\": \"http://example.com\",\n      \"workers\": 5,\n      \"processes_per_worker\": 10\n  }\n}"
+            },
+            "url": {
+              "raw": "{{agentUrl}}/execute",
+              "host": [
+                "{{agentUrl}}"
+              ],
+              "path": [
+                "execute"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Stop (Agent)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-SECRET-KEY",
+                "value": "secret"
+              }
+            ],
+            "url": {
+              "raw": "{{agentUrl}}/stop",
+              "host": [
+                "{{agentUrl}}"
+              ],
+              "path": [
+                "stop"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "centralUrl",
+      "value": "http://192.168.250.245:5000"
+    },
+    {
+      "key": "agentUrl",
+      "value": "http://192.168.1.101:5000"
+    },
+    {
+      "key": "token",
+      "value": "YOUR_JWT_TOKEN_HERE"
+    }
+  ]
+} 

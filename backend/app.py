@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from flask import Flask, redirect, request, session, jsonify, url_for
+from flask import Flask, jsonify, url_for, session
 from datetime import timedelta, UTC
 from backend.config import Config
 from backend.database import db
@@ -8,37 +8,62 @@ from dotenv import load_dotenv
 from threading import Thread
 from backend.monitor import monitor_running_tasks
 from flask_cors import CORS
+import uuid
+from celery import Celery
+
+def create_celery(app):
+    """Create and configure Celery instance"""
+    celery = Celery(
+        app.import_name,
+        broker=app.config['CELERY_BROKER_URL'],
+        backend=app.config['CELERY_RESULT_BACKEND']
+    )
+    celery.conf.update(app.config)
+
+    class ContextTask(celery.Task):
+        def __call__(self, *args, **kwargs):
+            with app.app_context():
+                return self.run(*args, **kwargs)
+
+    celery.Task = ContextTask
+    return celery
 
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
+    
+    # Session configuration remains for legacy or other purposes,
+    # but is not used for enforcing authentication exclusively.
+    app.config['SESSION_COOKIE_NAME'] = 'my_app_session'
+    app.config['SESSION_COOKIE_HTTPONLY'] = True
+    app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+    app.config['SESSION_COOKIE_SECURE'] = False 
 
-    # Enable CORS for all domains (for development) and allow credentials (so cookies/sessions are sent)
-    CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}}, supports_credentials=True)
+    # Enable CORS for development
+    CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
     # Set testing config if FLASK_ENV environment variable is 'testing'
-    if os.getenv("FLASK_ENV") == "testing":
-        app.config["TESTING"] = True
-    else:
-        app.config["TESTING"] = False
+    app.config["TESTING"] = os.getenv("FLASK_ENV") == "testing"
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(minutes=30)
     app.config["SESSION_COOKIE_HTTPONLY"] = True
     app.config["SESSION_COOKIE_SECURE"] = True  # Ensure HTTPS in production
+
     db.init_app(app)
 
-    # Only initialize Flask-Migrate if not in testing mode to avoid SQLAlchemy typing errors
+    # Initialize Flask-Migrate when not testing.
     if not app.config.get("TESTING"):
         from flask_migrate import Migrate
         Migrate(app, db)
 
-    # Import and register blueprints
+    # Import and register blueprints.
     from backend.routes.auth_routes import auth_bp
     from backend.routes.attack_routes import attack_bp
     from backend.routes.dashboard_routes import dashboard_bp
     from backend.routes.custom_test_routes import custom_tests_bp
     from backend.routes.test_routes import test_bp
     from backend.routes.admin_routes import admin_bp
+    from backend.routes.main_routes import main_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(attack_bp)
@@ -46,30 +71,23 @@ def create_app():
     app.register_blueprint(custom_tests_bp)
     app.register_blueprint(test_bp)
     app.register_blueprint(admin_bp)
+    app.register_blueprint(main_bp)
 
+    # No global session-based authentication is enforced.
+    
     @app.before_request
-    def enforce_authentication():
-        # Public endpoints do not require an active session.
-        public_paths = [
-            "/auth/login", 
-            "/auth/signup", 
-            "/auth/reset-password", 
-            "/auth/verify-token", 
-            "/auth/refresh-token"
-        ]
-        # Allow static files and favicon.
-        if request.path.startswith("/static") or request.path.startswith("/favicon"):
-            return
-        # If the path is public, allow it.
-        if any(request.path.startswith(path) for path in public_paths):
-            return
-        # For all other paths, a valid session is required.
-        if "user_id" not in session:
-            # If JSON is expected, return JSON error.
-            if request.is_json:
-                return jsonify({"error": "Authentication required. Please log in or sign up."}), 401
-            # Otherwise, redirect to the login page.
-            return redirect(url_for("auth_v1.login"))
+    def make_session_permanent():
+        session.permanent = True
+        if 'session_id' not in session:
+            session['session_id'] = str(uuid.uuid4())
+
+    # Create tables if they don't exist
+    with app.app_context():
+        db.create_all()
+
+    # Initialize Celery
+    celery = create_celery(app)
+    app.extensions["celery"] = celery
 
     return app
 
@@ -80,4 +98,4 @@ if __name__ == '__main__':
     monitor_thread = Thread(target=monitor_running_tasks, args=(app,), daemon=True)
     monitor_thread.start()
     
-    app.run(host='0.0.0.0', port=5000, debug=False)
+    app.run(host='0.0.0.0', port=5000, debug=True)

@@ -6,18 +6,40 @@ import logging
 dashboard_bp = Blueprint("dashboard", __name__, url_prefix="/dashboard")
 logger = logging.getLogger(__name__)
 
+def get_authenticated_user():
+    """
+    First, try to obtain the user based on the session.  If not in session,
+    then try to decode the bearer token from the Authorization header.
+    """
+    # Check if session holds the user ID.
+    user_id = session.get("user_id")
+    if user_id:
+        user = ShieldbotUser.query.get(user_id)
+        if user:
+            return user, None
+        else:
+            return None, "User not found in session."
+    
+    # Next, try to retrieve and decode a bearer token from the header.
+    token = request.headers.get("Authorization")
+    if token and token.startswith("Bearer "):
+        token = token.split(" ", 1)[1]
+    if token:
+        user, error = decode_and_verify_token(token)
+        if error:
+            return None, error
+        return user, None
+    
+    return None, "Authentication required. Please log in or sign up."
+
 @dashboard_bp.route("/", methods=["GET"])
 def dashboard():
-    token = request.headers.get("Authorization") or session.get("token")
-    if not token:
-        return jsonify({"error": "Authentication required. Please log in or sign up."}), 401
-
-    shieldbot_user, error = decode_and_verify_token(token)
+    shieldbot_user, error = get_authenticated_user()
     if error:
         return jsonify({"error": error}), 401
 
     try:
-        # Query all tests for the current user from the Test model, ordering by the most recent
+        # Query all tests for the current user, ordering by the most recent.
         tests = Test.query.filter_by(user_id=shieldbot_user.id).order_by(Test.start_time.desc()).all()
         logger.debug("Fetched %d tests for user_id %s", len(tests), shieldbot_user.id)
     except Exception as err:
@@ -52,9 +74,9 @@ def dashboard():
 
 @dashboard_bp.route("/home", methods=["GET"])
 def home():
-    token = request.headers.get("Authorization") or session.get("token")
-    if not token:
-        return jsonify({"error": "Authentication required. Please log in or sign up."}), 401
+    shieldbot_user, error = get_authenticated_user()
+    if error:
+        return jsonify({"error": error}), 401
 
     available_attacks = [
         {"name": "Brute Force Attack", "description": "Test common credentials using brute force."},

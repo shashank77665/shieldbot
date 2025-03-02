@@ -4,25 +4,30 @@ import requests
 import logging
 from celery import Celery
 from backend.config import Config
+from datetime import datetime
 
 # Import your attack functions
-from backend.attack_scripts import (
-    brute_force_test,
-    sql_injection_test,
-    dos_attack_test,
-    command_injection_test,
-    csrf_attack_test,
-    directory_traversal_test,
-    xss_attack_test
-)
+from backend.attack_scripts.ddos_attack import ddos_attack_test
+from backend.attack_scripts.port_scan import port_scan_test
+from backend.attack_scripts.ip_location import ip_location_test
+from backend.attack_scripts.brute_force import brute_force_test
+
 import os
 
-# Configure the Celery application instance.
+# Configure logging
+logger = logging.getLogger(__name__)
+
+# Configure the Celery application instance
 celery_app = Celery(
     "tasks",
     broker=Config.CELERY_BROKER_URL,
     backend=Config.CELERY_RESULT_BACKEND
 )
+
+# Configure Celery to only run one task at a time
+celery_app.conf.task_acks_late = True
+celery_app.conf.worker_prefetch_multiplier = 1
+celery_app.conf.worker_concurrency = 1
 
 # ---------------------------
 # Simulation functions for quick testing (optional)
@@ -70,78 +75,47 @@ def get_attack_logs(base_url, requested_attacks):
 # ---------------------------
 # Celery Task
 # ---------------------------
-@celery_app.task
-def run_cyber_test_task(test_id, base_url, test_options, user_id):
+# ... existing code ...
+
+@celery_app.task(bind=True)
+def run_cyber_test_task(self, test_id, base_url, options, user_id):
     """
-    Celery task to conduct cybersecurity tests.
-    - 'test_options' should include a key 'attacks' with a list of attack names to run.
-    - This task updates the Test record with status, logs, AI insights, etc.
+    Executes a cybersecurity test using the test executor.
+    This task is designed to be run asynchronously by Celery.
+    
+    Args:
+        test_id: ID of the test to execute
+        base_url: Target URL for the test
+        options: Dictionary of test options, including attack_type
+        user_id: ID of the user who initiated the test
     """
     from backend.models import Test
     from backend.database import db
+    
+    # Update task ID in the test record
+    with celery_app.app_context():
+        test = Test.query.get(test_id)
+        if test:
+            test.celery_task_id = self.request.id
+            test.status = "Running"
+            db.session.commit()
+    
+    # Execute the actual test
+    results = execute_test(test_id, base_url, options, user_id)
+    
+    # Update the test record with results
+    with celery_app.app_context():
+        test = Test.query.get(test_id)
+        if test:
+            test.status = "Completed"
+            test.end_time = datetime.utcnow()
+            test.logs = results
+            db.session.commit()
+    
+    return results
 
-    # Retrieve the Test record.
-    test = Test.query.get(test_id)
-    if not test:
-        return {"error": "Test not found"}
-
-    # Update status to Running.
-    test.status = "Running"
-    db.session.commit()
-    
-    # Determine which attacks to run. Default to a few if not specified.
-    requested_attacks = test_options.get("attacks", ["brute_force", "sql_injection", "xss_attack"])
-    
-    # For quick testing, we can use simulation functions.
-    # For real tests, you may choose to call 'execute_test' below.
-    logs = get_attack_logs(base_url, requested_attacks)
-    
-    # Simulate a delay to represent actual test execution.
-    time.sleep(5)
-    
-    # Get AI insights based on the collected logs.
-    ai_insights = ai_decision(logs)
-    
-    # Update the Test record with logs, AI insights, and final status.
-    test.logs = logs
-    test.ai_insights = ai_insights
-    test.status = "Completed"
-    test.end_time = datetime.utcnow()
-    db.session.commit()
-    
-    # Return the logs and insights as task result.
-    return {"logs": logs, "ai_insights": ai_insights}
-
-def ai_decision(test_logs):
-    """
-    Calls the Hugging Face inference API (using model: gpt2) to analyze test logs.
-    Returns the AI assessment as JSON. If errors occur, returns a default recommendation.
-    """
-    hf_key = Config.HF_API_KEY
-    prompt = "Analyze test logs: " + json.dumps(test_logs)
-    headers = {"Authorization": f"Bearer {hf_key}"}
-    payload = {"inputs": prompt}
-    try:
-        response = requests.post(
-            "https://api-inference.huggingface.co/models/gpt2",
-            headers=headers,
-            json=payload,
-            timeout=10
-        )
-        if response.ok:
-            return response.json()
-        else:
-            logging.error("Hugging Face API error: %s", response.text)
-            return {"recommendation": "Error in AI assessment", "confidence": 0.0}
-    except Exception as e:
-        logging.exception("Exception during AI integration")
-        return {"recommendation": "Error in AI assessment", "confidence": 0.0}
-
-# Alias for backward compatibility with routes expecting `run_attacks`
+# Alias for backward compatibility - ensure both function signatures match
 run_attacks = run_cyber_test_task
-
-logger = logging.getLogger(__name__)
-
 # ---------------------------
 # Execute Real Tests (Optional)
 # ---------------------------
@@ -150,8 +124,28 @@ def execute_test(test_id, base_url, options, user_id):
     Executes all cybersecurity attack tests by calling the real functions from your attack scripts.
     Aggregates each test's results (including logs, score, and success) and logs them.
     This function can be used synchronously or be invoked from another Celery task.
+    
+    Args:
+        test_id: ID of the test record
+        base_url: Target URL for the test
+        options: Dictionary containing test options, including attack_type
+        user_id: ID of the user who initiated the test
     """
+    from backend.models import Test
+    from backend.database import db
+    
+    # Update test status to Running
+    with celery_app.app_context():
+        test = Test.query.get(test_id)
+        if test:
+            test.status = "Running"
+            db.session.commit()
+    
     results = {}
+    attack_type = options.get("attack_type", "")
+    test_options = options.get("options", {})
+    
+    # Map of test types to their respective functions
     tests = {
         "brute_force": brute_force_test,
         "sql_injection": sql_injection_test,
@@ -160,20 +154,46 @@ def execute_test(test_id, base_url, options, user_id):
         "csrf_attack": csrf_attack_test,
         "directory_traversal": directory_traversal_test,
         "xss_attack": xss_attack_test,
+        "port_scan": port_scan_test,
+        "ddos": ddos_attack_test,
+        "ip_location": ip_location_test,
     }
-    for test_name, test_func in tests.items():
+    
+    # Execute the specific test if provided, or all tests if none specified
+    if attack_type and attack_type in tests:
         try:
-            # Each test function should accept the base_url and options (if any) for that test.
-            result = test_func(base_url, options.get(test_name, {}))
+            result = tests[attack_type](base_url, test_options)
+            results[attack_type] = result
         except Exception as e:
-            result = {
-                "logs": [f"Critical error running {test_name}: {str(e)}"],
+            results[attack_type] = {
+                "logs": [f"Critical error running {attack_type}: {str(e)}"],
                 "score": 0,
                 "success": False,
                 "error": str(e)
             }
-        results[test_name] = result
-
+    else:
+        # Run all tests if no specific test is specified
+        for test_name, test_func in tests.items():
+            try:
+                result = test_func(base_url, test_options.get(test_name, {}))
+                results[test_name] = result
+            except Exception as e:
+                results[test_name] = {
+                    "logs": [f"Critical error running {test_name}: {str(e)}"],
+                    "score": 0,
+                    "success": False,
+                    "error": str(e)
+                }
+    
+    # Update test status to Completed
+    with celery_app.app_context():
+        test = Test.query.get(test_id)
+        if test:
+            test.status = "Completed"
+            test.end_time = datetime.utcnow()
+            test.logs = results
+            db.session.commit()
+    
     logger.info("Test results: %s", results)
     return results
 
