@@ -4,7 +4,7 @@ import 'package:shieldbot/routes.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await dotenv.load();
+  // await dotenv.load();
   runApp(const MyApp());
 }
 

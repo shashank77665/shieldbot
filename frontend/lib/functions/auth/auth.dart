@@ -5,9 +5,11 @@ import 'dart:convert';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+String backed_url = "https://backend.shieldbot.me";
+
 Future<String> signUpUser(
     String username, String email, String password) async {
-  String url = "${dotenv.env['BACKEND_URL']}/auth/signup";
+  String url = "$backed_url/auth/signup";
 
   try {
     final response = await http.post(
@@ -38,7 +40,7 @@ Future<String> signUpUser(
 
 Future<String> logIn(
     BuildContext context, String email, String password) async {
-  String url = "${dotenv.env['BACKEND_URL']}/auth/login";
+  String url = "$backed_url/auth/login";
   print("trying to login");
 
   try {
@@ -90,7 +92,7 @@ Future<String> logIn(
 }
 
 Future<void> logOut(BuildContext context) async {
-  String url = "${dotenv.env['BACKEND_URL']}/auth/logout";
+  String url = "$backed_url/auth/logout";
 
   try {
     final response = await http.post(Uri.parse(url));
@@ -109,7 +111,7 @@ Future<void> logOut(BuildContext context) async {
 }
 
 Future<bool> isTokenValid(String token) async {
-  String url = "${dotenv.env['BACKEND_URL']}/auth/verify-token";
+  String url = "$backed_url/auth/verify-token";
 
   try {
     print("checking token validity");
