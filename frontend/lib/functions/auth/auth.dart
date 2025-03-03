@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:go_router/go_router.dart';
@@ -6,7 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 Future<String> signUpUser(
     String username, String email, String password) async {
-  const String url = "http://13.233.91.145/auth/signup";
+  String url = "${dotenv.env['BACKEND_URL']}/auth/signup";
 
   try {
     final response = await http.post(
@@ -37,7 +38,7 @@ Future<String> signUpUser(
 
 Future<String> logIn(
     BuildContext context, String email, String password) async {
-  const String url = "http://13.233.91.145/auth/login";
+  String url = "${dotenv.env['BACKEND_URL']}/auth/login";
   print("trying to login");
 
   try {
@@ -89,7 +90,7 @@ Future<String> logIn(
 }
 
 Future<void> logOut(BuildContext context) async {
-  const String url = "http://13.233.91.145/auth/logout";
+  String url = "${dotenv.env['BACKEND_URL']}/auth/logout";
 
   try {
     final response = await http.post(Uri.parse(url));
@@ -108,7 +109,7 @@ Future<void> logOut(BuildContext context) async {
 }
 
 Future<bool> isTokenValid(String token) async {
-  const String url = "http://13.233.91.145/auth/verify-token";
+  String url = "${dotenv.env['BACKEND_URL']}/auth/verify-token";
 
   try {
     print("checking token validity");
