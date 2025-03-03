@@ -69,7 +69,7 @@ class _HeaderState extends State<Header> {
               context.go('/landing');
             },
             child: Text(
-              'shieldBot',
+              'shieldBot updated',
               style: AppStyles.subheadingStyle,
             ),
           ),
