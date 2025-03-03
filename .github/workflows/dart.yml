@@ -33,7 +33,8 @@ jobs:
       - name: Build Flutter Web
         run: |
           cd frontend
-          flutter build web --release
+          flutter build web --base-href="/shieldbot-web/"
+
       - name: Clone shieldbot-web Repository
         run: |
           git clone https://x-access-token:${{ secrets.TOKEN }}@github.com/shashank77665/shieldbot-web.git shieldbot-web
