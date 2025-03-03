@@ -9,7 +9,7 @@ final GoRouter appRouter = GoRouter(
   routes: [
     GoRoute(
       path: '/',
-      builder: (context, state) => Dashboard(),
+      builder: (context, state) => LandingPage(),
     ),
     GoRoute(
       path: '/landing',
