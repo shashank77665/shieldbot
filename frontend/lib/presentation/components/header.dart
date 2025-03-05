@@ -69,7 +69,7 @@ class _HeaderState extends State<Header> {
               context.go('/landing');
             },
             child: Text(
-              'shieldBot updatedv2',
+              'shieldBot',
               style: AppStyles.subheadingStyle,
             ),
           ),
@@ -112,6 +112,19 @@ class _HeaderState extends State<Header> {
                   },
                   child: Text(
                     'About Us',
+                    style: AppStyles.subheadingStyle
+                        .copyWith(fontSize: 20, color: Colors.white38),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                child: GestureDetector(
+                  onTap: () {
+                    context.go('/iptool');
+                  },
+                  child: Text(
+                    'Analyse IP',
                     style: AppStyles.subheadingStyle
                         .copyWith(fontSize: 20, color: Colors.white38),
                   ),

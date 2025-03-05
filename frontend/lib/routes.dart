@@ -1,7 +1,9 @@
 import 'package:go_router/go_router.dart';
 import 'package:shieldbot/presentation/aboutUs.dart';
 import 'package:shieldbot/presentation/dashboard.dart';
+import 'package:shieldbot/presentation/dnsResult.dart';
 import 'package:shieldbot/presentation/faq.dart';
+import 'package:shieldbot/presentation/ipTool.dart';
 import 'package:shieldbot/presentation/landigPage.dart';
 import 'package:shieldbot/presentation/ourServices.dart';
 
@@ -30,6 +32,17 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/dashboard',
       builder: (context, state) => Dashboard(),
+    ),
+    GoRoute(
+      path: '/iptool',
+      builder: (context, state) => ipToolPage(),
+    ),
+    GoRoute(
+      path: '/dnsresult',
+      builder: (context, state) {
+        final resultip = state.extra as Map<String, dynamic>?;
+        return IpResolveResultPage(resultip: resultip);
+      },
     ),
   ],
 );
