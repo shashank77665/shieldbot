@@ -1,0 +1,51 @@
+# Python bytecode and caches
+*.py[cod]
+*$py.class
+__pycache__/
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+
+# Virtual environments
+venv/
+ENV/
+env/
+.venv/
+env.bak/
+venv.bak/
+
+# Django stuff:
+*.log
+local_settings.py
+db.sqlite3
+
+# Media files (if you don't want to version uploaded media)
+shieldbot_project/shieldbot_project/media/
+
+# Environment variables files
+.env
+shieldbot_project/.env
+
+# IDE / Editor directories and files
+.idea/
+.vscode/
+
+# OS generated files
+.DS_Store
+Thumbs.db
