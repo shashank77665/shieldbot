@@ -13,8 +13,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
-    return MaterialApp(
+    return MaterialApp.router(
       title: 'shieldBot',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
